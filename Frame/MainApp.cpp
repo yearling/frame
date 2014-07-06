@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "MyApp.h"
-MyAPP theApp;
+#include "YYGame.h"
+YYGame theApp;
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 					   _In_opt_ HINSTANCE hPrevInstance,
 					   _In_ LPTSTR    lpCmdLine,
@@ -12,7 +12,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	YYUTApplication* yy_app=GetApplication();
 	try {
 		yy_app->Initial();
-	yy_app->WindowCreate(1920,1080,_T("my first window"),nCmdShow);
+		yy_app->WindowCreate(800,600,_T("my first window"),nCmdShow);
 	if(!yy_app->GameInit())
 		return -1;
 	result=yy_app->Run();

@@ -30,11 +30,14 @@
     <ClCompile Include="MainApp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MyApp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\YYUT\YYUTApplication.cpp">
       <Filter>YYUT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUT.cpp">
+      <Filter>YYUT</Filter>
+    </ClCompile>
+    <ClCompile Include="YYGame.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -47,11 +50,14 @@
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h">
       <Filter>YYUT</Filter>
     </ClInclude>
-    <ClInclude Include="MyApp.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\YYUT\YYUTApplication.h">
       <Filter>YYUT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUT.h">
+      <Filter>YYUT</Filter>
+    </ClInclude>
+    <ClInclude Include="YYGame.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -80,18 +80,20 @@
     <ClCompile Include="..\YYUT\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUT.cpp" />
     <ClCompile Include="..\YYUT\YYUTApplication.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
     <ClCompile Include="MainApp.cpp" />
-    <ClCompile Include="MyApp.cpp" />
+    <ClCompile Include="YYGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\YYUT\stdafx.h" />
+    <ClInclude Include="..\YYUT\YYUT.h" />
     <ClInclude Include="..\YYUT\YYUTApplication.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
-    <ClInclude Include="MyApp.h" />
+    <ClInclude Include="YYGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
