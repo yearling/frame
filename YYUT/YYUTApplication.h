@@ -20,13 +20,11 @@ public:
 	friend yyWindow;
 	YYUTApplication(void);
 	virtual ~YYUTApplication(void);
-	virtual bool WindowCreate(int width,int height,const TCHAR *,int);
+	virtual bool WindowCreate(int width,int height,const TCHAR *,int=SW_SHOW);
 	virtual bool  Initial();
 	virtual int Run();
 	virtual int Exit();
-	virtual void GameMain(DWORD timespan);
-	virtual bool GameInit();
-	virtual void GameExit();
+
 protected:
 	static LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 	virtual LRESULT MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);

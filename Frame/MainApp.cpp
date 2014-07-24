@@ -11,17 +11,15 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	int result=0;
 	YYUTApplication* yy_app=GetApplication();
 	try {
-		yy_app->Initial();
-		yy_app->WindowCreate(800,600,_T("my first window"),nCmdShow);
-	if(!yy_app->GameInit())
-		return -1;
+		if(!yy_app->Initial())
+			return -1;
 	result=yy_app->Run();
-	yy_app->GameExit();
 	yy_app->Exit();
 	}
 	catch(yyd3dException &e)
 	{
 		//cout<<*boost::get_error_info<boost::throw_file>(e)<<endl;
+		e.what();
 	}
 	return result;
 }

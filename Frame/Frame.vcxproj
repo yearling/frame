@@ -82,6 +82,7 @@
     </ClCompile>
     <ClCompile Include="..\YYUT\YYUT.cpp" />
     <ClCompile Include="..\YYUT\YYUTApplication.cpp" />
+    <ClCompile Include="..\YYUT\YYUTenum.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
     <ClCompile Include="MainApp.cpp" />
@@ -91,6 +92,7 @@
     <ClInclude Include="..\YYUT\stdafx.h" />
     <ClInclude Include="..\YYUT\YYUT.h" />
     <ClInclude Include="..\YYUT\YYUTApplication.h" />
+    <ClInclude Include="..\YYUT\YYUTenum.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
     <ClInclude Include="YYGame.h" />

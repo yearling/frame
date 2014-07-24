@@ -72,7 +72,7 @@ namespace YYUT
 		HWND m_hCurrentMainHWND;
 		HWND m_hVSMainHWND;
 	};
-	void YYSetConsole(void);//设置名为“DebugConsole”的位置为第二屏幕的控制台
+	void YYSetConsole(HWND=nullptr);//设置名为“DebugConsole”的位置为第二屏幕的控制台
 	void YYSetConsoleA( string file_name);//把输入定义到某文件，用来打log
 	void YYSetConsoleW(wstring file_name);
 	CMutiScreen* GetMutiScreen();//单例模式，得到CMutiScrren

@@ -46,7 +46,6 @@ int YYUTApplication::Run()
 			DispatchMessage(&msg);
 		}
 		DWORD current_time=timeGetTime();
-		this->GameMain(current_time-last_time);
 		last_time=current_time;
 	}
 	return static_cast<int>(msg.wParam);
@@ -54,23 +53,10 @@ int YYUTApplication::Run()
 
 int YYUTApplication::Exit()
 {
+
 	return 0;
 }
 
-void YYUTApplication::GameMain(DWORD timespan)
-{
-
-}
-
-bool YYUTApplication::GameInit()
-{
-	return true;
-}
-
-void YYUTApplication::GameExit()
-{
-
-}
 
 LRESULT CALLBACK YYUTApplication::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -139,8 +125,8 @@ bool yyWindow::Init(int _width,int _height,const TCHAR *title)
 			RECT window_rect = {0,0,width-1,height-1};
 			// make the call to adjust window_rect
 			::AdjustWindowRectEx(&window_rect,GetWindowStyle(hwnd),GetMenu(hwnd) != NULL,GetWindowExStyle(hwnd));
-			MoveWindow(hwnd,200, // x position
-				200, // y position
+			MoveWindow(hwnd,100, // x position
+				50, // y position
 				window_rect.right - window_rect.left, // width
 				window_rect.bottom - window_rect.top, // height
 				FALSE);

@@ -189,7 +189,7 @@ namespace YYUT
 			RECT rc=GetRect(m_hOther);
 			for (auto it=m_hpVSWindows.begin();it!=m_hpVSWindows.end();it++)
 			{
-				::SetWindowPos(it->hwnd,HWND_TOP,rc.left,rc.top,rc.right-rc.left,rc.bottom-rc.top,SWP_SHOWWINDOW );
+				::SetWindowPos(it->hwnd,HWND_NOTOPMOST,rc.left,rc.top,rc.right-rc.left,rc.bottom-rc.top,SWP_SHOWWINDOW );
 			}
 		}
 		return true;
@@ -203,7 +203,7 @@ namespace YYUT
 			for (auto it=m_hpVSWindows.begin();it!=m_hpVSWindows.end();it++)
 			{
 				RECT rc=it->rc;
-				::SetWindowPos(it->hwnd,HWND_TOP,rc.left,rc.top,rc.right-rc.left,rc.bottom-rc.top,SWP_SHOWWINDOW|SWP_NOZORDER  );
+				::SetWindowPos(it->hwnd,HWND_NOTOPMOST,rc.left,rc.top,rc.right-rc.left,rc.bottom-rc.top,SWP_SHOWWINDOW|SWP_NOZORDER  );
 				::SendMessage(it->hwnd, WM_SYSCOMMAND, SC_MAXIMIZE , 0);
 			}
 		}
@@ -222,7 +222,7 @@ namespace YYUT
 	}
 	//////////////////////////////////////////////////////////////////////////
 
-	void YYSetConsole(void)
+	void YYSetConsole(HWND after)
 	{
 		AllocConsole();
 		FILE *stream;
@@ -234,8 +234,7 @@ namespace YYUT
 		pMS->Init();
 		if(pMS==NULL)
 			return;
-		if(pMS->m_nNumber>=2)
-		{
+		
 			RECT rc=pMS->GetRect(pMS->m_hOther);
 			LPCTSTR title=_T("DebugConsole");
 			SetConsoleTitle(title);
@@ -243,10 +242,20 @@ namespace YYUT
 			hWnd=GetConsoleWindow();
 			if(hWnd!=NULL)
 			{
-				::SetWindowPos(hWnd,HWND_TOP,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+				if(pMS->m_nNumber>=2)
+				{
+					::SetWindowPos(hWnd,HWND_NOTOPMOST,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+				}
+				else
+				{
+					if(after)
+						::SetWindowPos(hWnd,after,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+					else
+						::SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+				}
 			}
 			//找到visual studio的窗口并把它设到副窗口
-		}
+		
 	}
 	void YYSetConsoleA( string file_name)
 	{

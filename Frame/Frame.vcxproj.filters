@@ -39,6 +39,9 @@
     <ClCompile Include="YYGame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTenum.cpp">
+      <Filter>YYUT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\YYUT\stdafx.h">
@@ -58,6 +61,9 @@
     </ClInclude>
     <ClInclude Include="YYGame.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTenum.h">
+      <Filter>YYUT</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
