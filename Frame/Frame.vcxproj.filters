@@ -16,54 +16,72 @@
     <Filter Include="YYUT">
       <UniqueIdentifier>{314d336f-d270-4eb2-86ce-64edef12ab7c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="YYUT\头文件">
+      <UniqueIdentifier>{4bc0644f-dc3c-4520-a142-0ed3dfb3981e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="YYUT\Cpp">
+      <UniqueIdentifier>{dd0e6fa0-d550-40c8-8ab7-df40d4b6f981}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\YYUT\stdafx.cpp">
-      <Filter>YYUT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\YYUT\YYUTTimer.cpp">
-      <Filter>YYUT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp">
-      <Filter>YYUT</Filter>
-    </ClCompile>
     <ClCompile Include="MainApp.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\YYUT\YYUTApplication.cpp">
-      <Filter>YYUT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\YYUT\YYUT.cpp">
-      <Filter>YYUT</Filter>
     </ClCompile>
     <ClCompile Include="YYGame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\stdafx.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTTimer.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUT.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTApplication.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
     <ClCompile Include="..\YYUT\YYUTenum.cpp">
-      <Filter>YYUT</Filter>
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTGUI.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTMangager.cpp">
+      <Filter>YYUT\Cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\YYUT\stdafx.h">
-      <Filter>YYUT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\YYUT\YYUTTimer.h">
-      <Filter>YYUT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\YYUT\YYUTMutiScreen.h">
-      <Filter>YYUT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\YYUT\YYUTApplication.h">
-      <Filter>YYUT</Filter>
-    </ClInclude>
-    <ClInclude Include="..\YYUT\YYUT.h">
-      <Filter>YYUT</Filter>
-    </ClInclude>
     <ClInclude Include="YYGame.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\YYUT\stdafx.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTApplication.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
     <ClInclude Include="..\YYUT\YYUTenum.h">
-      <Filter>YYUT</Filter>
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTGUI.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUT.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMutiScreen.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTTimer.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMangager.h">
+      <Filter>YYUT\头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

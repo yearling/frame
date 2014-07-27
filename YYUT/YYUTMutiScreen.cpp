@@ -222,7 +222,42 @@ namespace YYUT
 	}
 	//////////////////////////////////////////////////////////////////////////
 
-	void YYSetConsole(HWND after)
+	void YYSetConsoleA(HWND after)
+	{
+		AllocConsole();
+		FILE *stream;
+		freopen_s(&stream,"CONOUT$", "w+t",stdout);
+		freopen_s(&stream,"CONIN$","w+t",stdin); 
+		freopen_s(&stream,"CONOUT$", "w+t",stderr); 
+		setlocale(LC_ALL,"chs");  
+		CMutiScreen *pMS=GetMutiScreen();
+		pMS->Init();
+		if(pMS==NULL)
+			return;
+		
+			RECT rc=pMS->GetRect(pMS->m_hOther);
+			LPCSTR title="DebugConsole";
+			SetConsoleTitleA(title);
+			HWND hWnd= FindWindowA(NULL,title);
+			hWnd=GetConsoleWindow();
+			if(hWnd!=NULL)
+			{
+				if(pMS->m_nNumber>=2)
+				{
+					::SetWindowPos(hWnd,HWND_NOTOPMOST,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+				}
+				else
+				{
+					if(after)
+						::SetWindowPos(hWnd,after,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+					else
+						::SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+				}
+			}
+			//找到visual studio的窗口并把它设到副窗口
+		
+	}
+	void YYSetConsoleW(HWND after)
 	{
 		AllocConsole();
 		FILE *stream;
@@ -257,6 +292,7 @@ namespace YYUT
 			//找到visual studio的窗口并把它设到副窗口
 		
 	}
+
 	void YYSetConsoleA( string file_name)
 	{
 		AllocConsole();
