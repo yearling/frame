@@ -3,7 +3,6 @@
 #include "YYUT.h"
 #include <boost\exception\detail\error_info_impl.hpp>
 #include <concrt.h>
-using namespace boost;
 namespace YYUT
 {
 	struct YYUTWidnowException:virtual YYUTException
@@ -37,7 +36,6 @@ namespace YYUT
 		virtual void Initial();
 		virtual int Run();
 		virtual void Exit();
-
 	protected:
 		static LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
 		virtual LRESULT MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -50,6 +48,7 @@ namespace YYUT
 	public:
 		std::shared_ptr<YYUTWindow> main_window;
 		HINSTANCE main_instance;
+		
 	};
 
 	extern YYUTApplication *YYUT_application;

@@ -62,12 +62,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>..\YYUT</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -79,12 +80,14 @@
   <ItemGroup>
     <ClCompile Include="..\YYUT\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\YYUT\YYUT.cpp" />
     <ClCompile Include="..\YYUT\YYUTApplication.cpp" />
     <ClCompile Include="..\YYUT\YYUTenum.cpp" />
     <ClCompile Include="..\YYUT\YYUTGUI.cpp" />
     <ClCompile Include="..\YYUT\YYUTMangager.cpp" />
+    <ClCompile Include="..\YYUT\YYUTres.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
     <ClCompile Include="MainApp.cpp" />
@@ -97,6 +100,7 @@
     <ClInclude Include="..\YYUT\YYUTenum.h" />
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
+    <ClInclude Include="..\YYUT\YYUTres.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
     <ClInclude Include="YYGame.h" />

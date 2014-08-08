@@ -18,6 +18,7 @@
     </Filter>
     <Filter Include="YYUT\头文件">
       <UniqueIdentifier>{4bc0644f-dc3c-4520-a142-0ed3dfb3981e}</UniqueIdentifier>
+      <Extensions>*.h</Extensions>
     </Filter>
     <Filter Include="YYUT\Cpp">
       <UniqueIdentifier>{dd0e6fa0-d550-40c8-8ab7-df40d4b6f981}</UniqueIdentifier>
@@ -51,6 +52,9 @@
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTres.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
     <ClCompile Include="..\YYUT\YYUTMangager.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
@@ -81,6 +85,9 @@
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTMangager.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTres.h">
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
   </ItemGroup>

@@ -37,6 +37,13 @@
 #else
 #define  TRACE_FUNCTION  
 #endif
+
+#ifdef _DEBUG
+#define TRACE_EXCEPTION(e)  e<<boost::throw_function(__FUNCTION__)<<boost::throw_file(__FILE__)\
+							<<boost::throw_line(__LINE__);
+#else
+#define TRACE_EXCEPTION(e)  
+#endif // _DEBUG
 namespace YYUT{
 
 	struct YYUTException:virtual boost::exception,virtual std::exception{};

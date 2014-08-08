@@ -8,6 +8,7 @@
 #include "YYUTTimer.h"
 #include <boost\exception\get_error_info.hpp>
 #include <boost/format.hpp>
+#include <boost/exception/all.hpp>
 using namespace YYUT;
 
 LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -466,15 +467,15 @@ void YYUT::YYUTManager::Initial()
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
 #ifdef _DEBUG
-		YYSetConsole(GetHWNDFocus());
-#endif
+	//	YYUT::YYSetConsoleA();		
+#endif // _DEBUG
 		SetHInstance(main_instance);
 		SetHWNDFocus(main_window->hwnd);
 		SetHWNDDeviceWindowed(main_window->hwnd);
 		SetHWNDDeviceFullScreen(main_window->hwnd);
 		CreateDevice(true,800,600);
-		GameInit();
 		GameResourceInit();
+		GameInit();
 	}
 	catch(YYUTWidnowException &e)
 	{
@@ -496,6 +497,15 @@ YYUTManager::YYUTManager()
 	D3D9=NULL;
 	D3D9Device=NULL;
 	CurrentDeviceSettings=NULL;
+	ZeroMemory(&BackBufferSurfaceDes9,sizeof(BackBufferSurfaceDes9));
+	ZeroMemory(&Caps,sizeof(Caps));
+	HWNDFocus=NULL;
+	HWNDDeviceFullScreen=NULL;
+	HWNDDeviceWindowed=NULL;
+	AdapterMonitor=NULL;
+	AutoChangeAdapter=true;
+	AllowShortcutKeys=true;
+	
 }
 
 YYUTManager::~YYUTManager()
@@ -626,12 +636,12 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 	YYUTD3D9DeviceSettings *old_d3ddevice_setting=GetCurrentDeviceSettings();
 	assert(new_device_Settings);
 	if(!new_device_Settings)
-		BOOST_THROW_EXCEPTION(enable_error_info(std::invalid_argument("invalid new_device_settings")));	
+		BOOST_THROW_EXCEPTION(boost::enable_error_info(std::invalid_argument("invalid new_device_settings")));	
 	//Make a copy of the new_device_setting on the heap
 	//对new_device_Settings的东西做一下备份。然后还指向它
 	YYUTD3D9DeviceSettings* new_device_settings_on_heap=new YYUTD3D9DeviceSettings;
 	if(new_device_settings_on_heap==NULL)
-		BOOST_THROW_EXCEPTION(enable_error_info(std::bad_alloc("Change device bad_alloc")));
+		BOOST_THROW_EXCEPTION(boost::enable_error_info(std::bad_alloc("Change device bad_alloc")));
 	memcpy(new_device_settings_on_heap,new_device_Settings,sizeof(YYUTD3D9DeviceSettings));
 	new_device_Settings=new_device_settings_on_heap;
 	if(!this->ModifyDeviceSettings(new_device_Settings))
@@ -788,6 +798,7 @@ void YYUTManager::Reset3DEnvironment()
 	if(GetDeviceObjectsReset()==true)
 	{
 		this->OnLostDevice(NULL);
+		SetDeviceObjectsReset(false);
 	}
 	//Reset the device
 	YYUTD3D9DeviceSettings *device_setting=GetCurrentDeviceSettings();
@@ -1103,6 +1114,7 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	SetupCursor();
 	D3DCAPS9 *d3d_caps=GetCaps();
 	d3d_device->GetDeviceCaps(d3d_caps);
+	SetDeviceObjectsReset( true );
 }
 
 void YYUTManager::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
@@ -1201,7 +1213,7 @@ void YYUTManager::Render3DEnvironment()
 	}
 	double time,abs_time;
 	float elapsed_time=0;
-	YYUTTimer::GetInstance().GetTimeAll(&time,&abs_time,&ElapsedTime);
+	YYUTTimer::GetInstance().GetTimeAll(&time,&abs_time,&elapsed_time);
 	if(GetConstantFrameTime())
 	{
 		elapsed_time=GetTimePerFrame();

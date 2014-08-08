@@ -8,6 +8,7 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <iostream>
 using namespace std;
 namespace YYUT
 {
@@ -221,15 +222,20 @@ namespace YYUT
 		return &g_MutiScreen;
 	}
 	//////////////////////////////////////////////////////////////////////////
+	
 
 	void YYSetConsoleA(HWND after)
 	{
 		AllocConsole();
 		FILE *stream;
-		freopen_s(&stream,"CONOUT$", "w+t",stdout);
+		freopen_s(&stream,"CONOUT$", "w",stdout);
 		freopen_s(&stream,"CONIN$","w+t",stdin); 
 		freopen_s(&stream,"CONOUT$", "w+t",stderr); 
 		setlocale(LC_ALL,"chs");  
+		std::ios::sync_with_stdio();
+		cout.clear();//防止在AllocConsole之前调用cout，这样子的话，cout.badbit set会被设置，然后就什么也不能输出了。
+		//见http://stackoverflow.com/questions/18914506/doing-a-stdendl-before-allocconsole-causes-no-display-of-stdcout
+		wcout.clear();
 		CMutiScreen *pMS=GetMutiScreen();
 		pMS->Init();
 		if(pMS==NULL)
@@ -244,7 +250,7 @@ namespace YYUT
 			{
 				if(pMS->m_nNumber>=2)
 				{
-					::SetWindowPos(hWnd,HWND_NOTOPMOST,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+					::SetWindowPos(hWnd,HWND_TOP,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
 				}
 				else
 				{
@@ -265,6 +271,9 @@ namespace YYUT
 		_tfreopen_s(&stream,_T("CONIN$"), _T("w+t"),stdin); 
 		_tfreopen_s(&stream,_T("CONOUT$"), _T("w+t"),stderr); 
 		_tsetlocale(LC_ALL,_T("chs"));  
+		std::ios::sync_with_stdio();
+		cout.clear();
+		wcout.clear();
 		CMutiScreen *pMS=GetMutiScreen();
 		pMS->Init();
 		if(pMS==NULL)
@@ -302,6 +311,10 @@ namespace YYUT
 		freopen_s(&stream,"CONIN$", "w+t",stdin); 
 		freopen_s(&stream,"CONOUT$", "w+t",stderr); 
 		setlocale(LC_ALL,"chs");  
+		std::ios::sync_with_stdio();
+		cout.clear();
+		wcout.clear();
+
 		CMutiScreen *pMS=GetMutiScreen();
 		pMS->Init();
 		if(pMS==NULL)
@@ -330,6 +343,10 @@ namespace YYUT
 		_wfreopen_s(&stream,L"CONIN$", L"w+t",stdin); 
 		_wfreopen_s(&stream,L"CONOUT$", L"w+t",stderr); 
 		_wsetlocale(LC_ALL,L"chs");  
+		std::ios::sync_with_stdio();
+		cout.clear();
+		wcout.clear();
+
 		CMutiScreen *pMS=GetMutiScreen();
 		pMS->Init();
 		if(pMS==NULL)
