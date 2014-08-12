@@ -23,7 +23,9 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	{
 		//cout<<*boost::get_error_info<boost::throw_file>(e)<<endl;
 		std::cout<<boost::current_exception_diagnostic_information();
+		system("pause");
 	}
+	system("pause");
 	return result;
 }
 

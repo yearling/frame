@@ -30,6 +30,9 @@ namespace YYUT
 		};
 	private:
 		LPDIRECT3DVERTEXBUFFER9 vertex_buf;
+		void HUDRest();
+		void HUDInit();
+
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
 	};

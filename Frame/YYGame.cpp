@@ -22,13 +22,7 @@ namespace YYUT
 
 	void YYGame::GameResourceReset()
 	try{
-		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
-		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
-		YYUTD3D9DeviceSettings *dev_seting=GetCurrentDeviceSettings();
-		int width=dev_seting->pp.BackBufferWidth;
-		int height=dev_seting->pp.BackBufferHeight;
-		hud_->SetLocation(width-170,0);
-		hud_->SetSize(170,170);
+		HUDRest();
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -42,19 +36,7 @@ namespace YYUT
 	void YYGame::GameResourceInit()
 	try{
 		HRESULT hr;
-		hud_=YYUTDialog::MakeDialog();
-		hud_->Init(YYUTDialogResourceManager::GetInstance(),true);
-		
-		int index_y=10;
-		shared_ptr<YYUTButton> bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",35,index_y,125,22);
-		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
-		hud_->AddButton(IDC_TOGGLEREF,L"Toggle REF(F3)",35,index_y+=24,125,22);
-		hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",35,index_y+=24,125,22,VK_F2);
-
-
-
-
-
+		HUDInit();
 		//////////////////////////////////////////////////////////////////////////
 		YYFVF g_Vertices[] =
 		{
@@ -71,13 +53,10 @@ namespace YYUT
 			return;
 		memcpy( pVertices, g_Vertices, sizeof( g_Vertices ));
 		vertex_buf->Unlock( );
-
 		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
 		GetD3D9Device()->SetRenderState(D3DRS_STENCILENABLE,TRUE);
-
 		YYUTDialogResourceManager::GetInstance()->SetHWND(GetHWND());
 		YYUTDialogResourceManager::GetInstance()->OnD3DCreateDevice(GetD3D9Device());
-		GameResourceReset();
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -113,16 +92,8 @@ namespace YYUT
 			GetD3D9Device()->SetStreamSource(0,vertex_buf,0,sizeof(YYFVF));
 			GetD3D9Device()->SetFVF(D3DFVF_YYFVF);
 			GetD3D9Device()->DrawPrimitive(D3DPT_TRIANGLESTRIP,0,1);
-			//ID3DXMesh *mesh=0;
-			//hr=D3DXCreateTeapot(GetD3D9Device(),&mesh,nullptr);
-			////if(SUCCEEDED(hr))
-			//{
-			//	mesh->DrawSubset(0);
-			//	mesh->Release();
-			//}
-			hud_->OnRender(timespan);
 			
-			
+			hud_->OnRender(timespan);	
 			GetD3D9Device()->EndScene();
 		}
 	}
@@ -137,15 +108,6 @@ namespace YYUT
 
 	void YYGame::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
 	{
-		/*if(bLeftButtonDown)
-			ToggleFullScreen();
-		if(bRightButtonDown)
-		{
-			if(GetRenderingPaused())
-				Pause(false,false);
-			else
-				Pause(true,true);
-		}*/
 	}
 
 	HRESULT YYGame::PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &further_process)
@@ -161,6 +123,30 @@ namespace YYUT
 		}
 		further_process=false;
 		return 0;
+	}
+
+	void YYGame::HUDRest()
+	{
+		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
+		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
+		YYUTD3D9DeviceSettings *dev_seting=GetCurrentDeviceSettings();
+		int width=dev_seting->pp.BackBufferWidth;
+		int height=dev_seting->pp.BackBufferHeight;
+		hud_->SetLocation(width-170,0);
+		hud_->SetSize(170,170);
+	}
+
+	void YYGame::HUDInit()
+	{
+		HRESULT hr;
+		hud_=YYUTDialog::MakeDialog();
+		hud_->Init(YYUTDialogResourceManager::GetInstance(),true);
+		int index_y=10;
+		shared_ptr<YYUTButton> bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",35,index_y,125,22);
+		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
+		hud_->AddButton(IDC_TOGGLEREF,L"Toggle REF(F3)",35,index_y+=24,125,22);
+		hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",35,index_y+=24,125,22,VK_F2);
+
 	}
 
 
