@@ -90,7 +90,7 @@ namespace YYUT
 		virtual void        GameResourceReset();
 		virtual void		GameResourceInit();
 		virtual void		GameResourceLost();
-		virtual void		GameMain(double timespan);
+		virtual void		GameMain(double time_span, double time_elapse);
 		virtual void		GameInit();
 		virtual void		GameExit();
 				void		Pause(bool _time,bool _render);

@@ -9,6 +9,9 @@ namespace YYUT
 		HRESULT hr;
 		CComPtr<ID3DXBuffer> material_buf;
 		DWORD num_material=0;
+		wstring pre_path=file_name.substr(0,file_name.find_last_of(_T('//')));
+		string pre_path_A(pre_path.begin(),pre_path.end());
+		string texture_path;
 		hr=D3DXLoadMeshFromX(file_name.c_str(),D3DXMESH_MANAGED,d3d_dev_,nullptr,&material_buf,nullptr,&num_material,&mesh_);
 		if(FAILED(hr))
 			BOOST_THROW_EXCEPTION(YYUTObjectException()<<err_str("Create Mesh Faild! mesh name is "+string(file_name.begin(),file_name.end()))<<err_hr(hr));
@@ -21,9 +24,10 @@ namespace YYUT
 				CComPtr<IDirect3DTexture9> tex;
 				if(mtrls[i].pTextureFilename!=nullptr)
 				{
-					hr=D3DXCreateTextureFromFileA(d3d_dev_,mtrls[i].pTextureFilename,&tex);
+					texture_path=pre_path_A+mtrls[i].pTextureFilename;
+					hr=D3DXCreateTextureFromFileA(d3d_dev_,texture_path.c_str(),&tex);
 					if(FAILED(hr))
-						BOOST_THROW_EXCEPTION(YYUTObjectException()<<err_str("Create Mesh Faild! mesh name is "+string(mtrls[i].pTextureFilename))<<err_hr(hr));
+						BOOST_THROW_EXCEPTION(YYUTObjectException()<<err_str("Create texture Faild! mesh name is "+string(mtrls[i].pTextureFilename))<<err_hr(hr));
 				}
 				material_texture_combine_.push_back(make_pair(mtrls[i].MatD3D,tex));
 			}
@@ -35,9 +39,14 @@ namespace YYUT
 		d3d_dev_=d3d_dev;
 	}
 
-	void YYUTObjectX::Draw(int id)
+	void YYUTObjectX::Draw()
 	{
-		mesh_->DrawSubset(id);
+		for(int i=0;i<material_texture_combine_.size();++i)
+		{
+			d3d_dev_->SetMaterial(&material_texture_combine_[i].first);
+			d3d_dev_->SetTexture(0,material_texture_combine_[i].second);
+			mesh_->DrawSubset(i);
+		}
 	}
 
 }

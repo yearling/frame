@@ -561,6 +561,7 @@ namespace YYUT
 			assert(manager_->GetD3D9Device() && manager_->state_block_);
 			CComPtr<IDirect3DDevice9> com_d3ddevice=manager_->GetD3D9Device();
 			CComPtr<IDirect3DStateBlock9> com_state_block=manager_->state_block_;
+			//过一段时间刷新一下，刷新掉默认焦点
 			if(last_time_refresh_ < time_refresh_)
 			{
 				last_time_refresh_=YYUTTimer::GetInstance().GetTime();
@@ -569,6 +570,7 @@ namespace YYUT
 			if(!visible_ || (minimized_ && !caption_enable_))
 				return ;
 			CComPtr<IDirect3DDevice9> d3d_device=manager_->GetD3D9Device();
+			//用来存储state_block,过会用来还原statae
 			manager_->state_block_->Capture();
 			d3d_device->SetRenderState(D3DRS_ALPHABLENDENABLE,TRUE);
 			d3d_device->SetRenderState(D3DRS_SRCBLEND,D3DBLEND_SRCALPHA);
@@ -660,7 +662,9 @@ namespace YYUT
 
 	void YYUTDialog::SetTexture(string name_id,wstring file_name)
 	{
-
+		assert(manager_!=nullptr && L"Try to call YYUTDialog::Init first");
+		shared_ptr<YYUTTextureNode> sp=manager_->AddTexture(file_name);
+		texture_map_[name_id]=sp;
 	}
 
 	void YYUTDialog::SetTexture(string name_id,wstring file_name,int source_id,HMODULE resource_module)
@@ -719,6 +723,7 @@ namespace YYUT
 			manager_->RegisterDialog(shared_from_this());
 		hwnd_=manager_->GetHWND();
 		SetTexture("default_texture",_T(""),0xffff,(HMODULE)0xFFFF);
+		SetTexture("desert",_T("Desert.jpg"));
 		InitDefaultElemets();
 	}
 
@@ -726,13 +731,6 @@ namespace YYUT
 	{
 
 	}
-
-	shared_ptr<YYUTDialog> YYUTDialog::MakeDialog()
-	{
-		//不能用make_shared<>，因constructor is protected
-		return shared_ptr<YYUTDialog>(new YYUTDialog);
-	}
-
 	void YYUTDialog::InitDefaultElemets()
 	{
 		//SetFont(0);
@@ -768,6 +766,13 @@ namespace YYUT
 		element.font_color_.state_[YYUT_STATE_MOUSEOVER]=D3DCOLOR_ARGB(30,255,255,255);
 		SetDefaultElemt(YYUT_CONTROL_BUTTON,1,&element);
 	}
+	shared_ptr<YYUTDialog> YYUTDialog::MakeDialog()
+	{
+		//不能用make_shared<>，因constructor is protected
+		return shared_ptr<YYUTDialog>(new YYUTDialog);
+	}
+
+	
 
 	YYUTDialog::~YYUTDialog()
 	{
@@ -1173,7 +1178,7 @@ namespace YYUT
 			state=YYUT_STATE_FOCUS;
 		}
 		shared_ptr<YYUTElement> element=GetElemet(0);
-		float blend_rate=(state==YYUT_STATE_PRESSED)?0.0f:0.8f;
+		float blend_rate=(state==YYUT_STATE_PRESSED)?0.0f:0.5f;
 		RECT rc_window=bounding_box_;
 		OffsetRect(&rc_window,offset_x,offset_y);
 
@@ -1188,7 +1193,7 @@ namespace YYUT
 			element->texture_color_.Blend(state,elapsed_time,blend_rate);
 			element->font_color_.Blend(state,elapsed_time,blend_rate);
 			dialog->DrawSprite(element,&rc_window);
-			dialog->DrawText(text_,element,rc_window);
+			//dialog->DrawText(text_,element,rc_window);
 		}
 		else
 			BOOST_THROW_EXCEPTION(YYUTGUIException()<<err_str("unexcept father dialog's life is over"));

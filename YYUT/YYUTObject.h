@@ -15,8 +15,9 @@ namespace YYUT{
 	};
 	class YYUTObjectX
 	{
+	public:
 		virtual void LoadObject(wstring file_name);
-		virtual void Draw(int id);
+		virtual void Draw();
 		void Init(CComPtr<IDirect3DDevice9> d3d_dev);
 	protected:
 		CComPtr<ID3DXMesh> mesh_;

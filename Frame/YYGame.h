@@ -16,7 +16,7 @@ namespace YYUT
 		virtual void        GameResourceReset();
 		virtual void		GameResourceInit();
 		virtual void		GameResourceLost();
-		virtual void		GameMain(double timespan);
+		virtual void GameMain(double time_span, double time_elapse);
 		virtual void		GameInit();
 		virtual void		GameExit();
 		virtual void		MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, 
@@ -29,10 +29,13 @@ namespace YYUT
 			FLOAT x,y,z;
 			DWORD color;
 		};
-		void LoadMesh();
 	private:
 		LPDIRECT3DVERTEXBUFFER9 vertex_buf;
 	protected:
+		void HUDRest();
+		void HUDInit();
+
+	public:
 		std::shared_ptr<YYUTDialog> hud_;
 		std::shared_ptr<YYUTObjectX> robot_mesh_;
 	};

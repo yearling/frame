@@ -423,7 +423,7 @@ void YYUT::YYUTManager::GameInit()
 {
 }
 
-void YYUTManager::GameMain(double timespan)
+void YYUT::YYUTManager::GameMain(double time_span, double time_elapse)
 {
 }
 
@@ -467,14 +467,13 @@ void YYUT::YYUTManager::Initial()
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
 #ifdef _DEBUG
-	//	YYUT::YYSetConsoleA();		
+		YYUT::YYSetConsoleA();		
 #endif // _DEBUG
 		SetHInstance(main_instance);
 		SetHWNDFocus(main_window->hwnd);
 		SetHWNDDeviceWindowed(main_window->hwnd);
 		SetHWNDDeviceFullScreen(main_window->hwnd);
 		CreateDevice(true,800,600);
-		GameResourceInit();
 		GameInit();
 	}
 	catch(YYUTWidnowException &e)
@@ -505,7 +504,6 @@ YYUTManager::YYUTManager()
 	AdapterMonitor=NULL;
 	AutoChangeAdapter=true;
 	AllowShortcutKeys=true;
-	
 }
 
 YYUTManager::~YYUTManager()
@@ -537,7 +535,7 @@ void YYUTManager::OnFrameMove(double fTime, float fElapsedTime)
 
 void YYUTManager::OnFrameRender(double fTime, float fElapsedTime)
 {
-	GameMain(fTime);
+	GameMain(fTime, fElapsedTime);
 }
 
 void YYUTManager::OnLostDevice(void* pUserContext)
@@ -629,8 +627,8 @@ void YYUTManager::WindowSizeChange()
 
 void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate, bool clip_window_to_single_adpater)
 {
-#ifdef _DEBUG
-	printf("call ChangeDevice\n");
+#ifdef _DEBUG || DEBUG
+	cout<<"call ChangeDevice\n"<<endl;
 #endif
 	HRESULT hr;
 	YYUTD3D9DeviceSettings *old_d3ddevice_setting=GetCurrentDeviceSettings();
@@ -725,7 +723,7 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 				SetCurrentDeviceSettings(old_d3ddevice_setting);
 				try
 				{
-					ChangeDevice(new_device_Settings,true,clip_window_to_single_adpater);
+					ChangeDevice(old_d3ddevice_setting,true,clip_window_to_single_adpater);
 				}	
 				catch(YYUTManagerException &e)
 				{	
@@ -1114,6 +1112,8 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	SetupCursor();
 	D3DCAPS9 *d3d_caps=GetCaps();
 	d3d_device->GetDeviceCaps(d3d_caps);
+	GameResourceInit();
+	OnResetDevice(nullptr);
 	SetDeviceObjectsReset( true );
 }
 
@@ -1150,8 +1150,6 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 			else
 				throw YYUTManagerException()<<err_str("can't find property device settings");
 			ChangeDevice(&device_setting,false,true);
-			/*if(FAILED(hr))
-			throw exception("failed to create device");*/
 	}
 	catch(YYUTException &e)
 	{
