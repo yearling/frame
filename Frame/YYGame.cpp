@@ -163,6 +163,12 @@ namespace YYUT
 		return 0;
 	}
 
+	void YYGame::LoadMesh()
+	{
+		HRESULT hr;
+
+	}
+
 
 	
 }

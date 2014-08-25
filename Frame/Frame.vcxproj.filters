@@ -58,6 +58,12 @@
     <ClCompile Include="..\YYUT\YYUTMangager.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTCamera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTObject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="YYGame.h">
@@ -89,6 +95,12 @@
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTres.h">
       <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTCamera.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTObject.h">
+      <Filter>YYUT\Cpp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

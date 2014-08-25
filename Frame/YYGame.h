@@ -3,6 +3,7 @@
 #include "YYUT.h"
 #include "YYUTMangager.h"
 #include "YYUTGUI.h"
+#include "YYUTObject.h"
 #include <memory>
 using std::shared_ptr;
 namespace YYUT
@@ -28,10 +29,12 @@ namespace YYUT
 			FLOAT x,y,z;
 			DWORD color;
 		};
+		void LoadMesh();
 	private:
 		LPDIRECT3DVERTEXBUFFER9 vertex_buf;
-	public:
+	protected:
 		std::shared_ptr<YYUTDialog> hud_;
+		std::shared_ptr<YYUTObjectX> robot_mesh_;
 	};
 
 }
