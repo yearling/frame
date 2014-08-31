@@ -100,7 +100,7 @@
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTObject.h">
-      <Filter>YYUT\Cpp</Filter>
+      <Filter>YYUT\头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

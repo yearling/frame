@@ -51,6 +51,7 @@ namespace YYUT
 	}
 	catch (YYUTGUIException &e)
 	{
+		UNREFERENCED_PARAMETER(e);
 #ifdef _DEBUG
 		cout<<"[YYUTDialogResourceManager]: OnCreateDevice failed!!"<<endl;
 #endif
@@ -180,10 +181,9 @@ namespace YYUT
 	}
 
 	void YYUTDialogResourceManager::RegisterDialog(shared_ptr<YYUTDialog>& dialog)
-	{
+{
 		dialogs_.insert(dialog);
 	}
-
 	void YYUTDialogResourceManager::UnRegisterDiaglog(shared_ptr<YYUTDialog>& dialog)
 	{
 		dialogs_.erase(dialog);
@@ -723,7 +723,6 @@ namespace YYUT
 			manager_->RegisterDialog(shared_from_this());
 		hwnd_=manager_->GetHWND();
 		SetTexture("default_texture",_T(""),0xffff,(HMODULE)0xFFFF);
-		SetTexture("desert",_T("Desert.jpg"));
 		InitDefaultElemets();
 	}
 

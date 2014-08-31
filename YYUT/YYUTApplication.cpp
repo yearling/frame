@@ -28,6 +28,7 @@ namespace YYUT
 		}
 		catch(YYUTWidnowException &e)
 		{
+			UNREFERENCED_PARAMETER(e);
 			throw;
 		}
 	}

@@ -627,10 +627,9 @@ void YYUTManager::WindowSizeChange()
 
 void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate, bool clip_window_to_single_adpater)
 {
-#ifdef _DEBUG || DEBUG
+#if (defined _DEBUG) || (defined DEBUG )
 	cout<<"call ChangeDevice\n"<<endl;
 #endif
-	HRESULT hr;
 	YYUTD3D9DeviceSettings *old_d3ddevice_setting=GetCurrentDeviceSettings();
 	assert(new_device_Settings);
 	if(!new_device_Settings)
@@ -749,6 +748,7 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 		}
 		catch(YYUTManagerException &e)
 		{
+			UNREFERENCED_PARAMETER(e);
 				delete old_d3ddevice_setting;
 				old_d3ddevice_setting=nullptr;
 				Cleanup3DEnvironment9(true);
@@ -957,7 +957,7 @@ void YYUT::YYUTManager::SetD3D9DeviceCursor(HCURSOR hCursor, bool bpush_backWate
 	bmi.bmiHeader.biCompression=BI_RGB;
 	hdc_screen=GetDC(NULL);
 	hdc_mask=CreateCompatibleDC(hdc_screen);
-	if(hdc_mask=nullptr)
+	if(hdc_mask==nullptr)
 	{
 		hr=E_FAIL;
 		goto End;
@@ -1153,6 +1153,7 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 	}
 	catch(YYUTException &e)
 	{
+		UNREFERENCED_PARAMETER(e);
 		throw;
 	}
 }
@@ -1294,6 +1295,7 @@ void YYUTManager::ToggleFullScreen()
 		}
 		catch(YYUTManagerException &e)
 		{
+			UNREFERENCED_PARAMETER(e);
 			ChangeDevice(&old_device_settings,false,false);
 		}
 	}

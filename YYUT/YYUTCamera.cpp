@@ -515,7 +515,7 @@ namespace YYUT
 		D3DXVECTOR3 pos_delta=velocity_*elapse_time;
 		if(mouse_wheel_delta_ && zoom_button_mask_==MOUSE_WHEEL)
 		{
-			radius_-=mouse_wheel_delta_*radius_*0.1/120.0f;
+			radius_-=(float)(mouse_wheel_delta_*radius_*0.1/120.0f);
 		}
 		radius_=(std::min)(max_radius_,radius_);
 		radius_=(std::max)(min_radius_,radius_);

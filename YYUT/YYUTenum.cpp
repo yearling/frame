@@ -153,7 +153,6 @@ namespace YYUT
 	HRESULT YYUTenum::Enumerate()
 	{
 		has_enumerated=true;
-		HRESULT hr;
 		ClearAdapterInfoList();
 		set<D3DFORMAT> adapter_format_set;
 		//BackBuffer or Display Formats
@@ -492,7 +491,7 @@ namespace YYUT
 						<<left<<setw(10)<<Device2String(com->DeviceType)
 						<<left<<setw(10)<<Format2String(com->AdapterFormat)<<_T("   ")
 						<<left<<setw(15)<<Format2String(com->BackBufferFormat)
-						<<left<<setw(10)<<Windowed2String(com->Windowed)<<endl;
+						<<left<<setw(10)<<Windowed2String(!!com->Windowed)<<endl;
 				}
 			}
 		}

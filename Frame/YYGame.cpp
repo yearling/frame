@@ -31,6 +31,7 @@ namespace YYUT
 	}
 	catch(YYUTGUIException &e)
 	{
+		UNREFERENCED_PARAMETER(e);
 #if defined( DEBUG ) || defined( _DEBUG )
 		cout<<"[GameResourceReset]:failed!!"<<endl;
 #endif
@@ -86,7 +87,7 @@ namespace YYUT
 
 	void YYGame::GameMain(double time_span, double time_elapse)
 	{
-		camera_.FrameMove(time_elapse);
+		camera_.FrameMove((float)time_elapse);
 		GetD3D9Device()->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_STENCIL|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 100, 0, 0 ), 1.0f, 0 );
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
@@ -106,7 +107,7 @@ namespace YYUT
 			world*=scale;
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
 			cell_mesh_->Draw();
-			hud_->OnRender(time_span);	
+			hud_->OnRender((float)time_span);	
 			GetD3D9Device()->EndScene();
 		}
 	}
@@ -146,14 +147,12 @@ namespace YYUT
 		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
 		YYUTD3D9DeviceSettings *dev_seting=GetCurrentDeviceSettings();
 		int width=dev_seting->pp.BackBufferWidth;
-		int height=dev_seting->pp.BackBufferHeight;
 		hud_->SetLocation(width-170,0);
 		hud_->SetSize(170,170);
 	}
 
 	void YYGame::HUDInit()
 	{
-		HRESULT hr;
 		hud_=YYUTDialog::MakeDialog();
 		hud_->Init(YYUTDialogResourceManager::GetInstance(),true);
 		int index_y=10;
