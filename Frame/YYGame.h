@@ -4,6 +4,7 @@
 #include "YYUTMangager.h"
 #include "YYUTGUI.h"
 #include "YYUTObject.h"
+#include "YYUTCamera.h"
 #include <memory>
 using std::shared_ptr;
 namespace YYUT
@@ -23,18 +24,11 @@ namespace YYUT
 			bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, 
 			int xPos, int yPos);
 		virtual HRESULT		PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process);
-				void       OnGUIEvent();
-		struct YYFVF
-		{
-			FLOAT x,y,z;
-			DWORD color;
-		};
-	private:
-		LPDIRECT3DVERTEXBUFFER9 vertex_buf;
+				void		OnGUIEvent();
 	protected:
 		void HUDRest();
 		void HUDInit();
-
+		YYUTModelViewerCamera camera_;
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
 		std::shared_ptr<YYUTObjectX> robot_mesh_;

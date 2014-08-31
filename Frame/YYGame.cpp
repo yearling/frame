@@ -23,6 +23,11 @@ namespace YYUT
 	void YYGame::GameResourceReset()
 	try{
 		HUDRest();
+		int width=GetCurrentDeviceSettings()->pp.BackBufferWidth;
+		int height=GetCurrentDeviceSettings()->pp.BackBufferHeight;
+		float aspect=(float)width/(float)height;
+		camera_.SetProjParam(D3DX_PI/4,aspect,1.0f,1000.0f);
+		camera_.SetWindow(width,height);
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -37,26 +42,15 @@ namespace YYUT
 	try{
 		HRESULT hr;
 		HUDInit();
-		//////////////////////////////////////////////////////////////////////////
-		YYFVF g_Vertices[] =
-		{
-			{ -1.0f,-1.0f, 0.0f, 0xffff0000, },
-			{  1.0f,-1.0f, 0.0f, 0xff0000ff, },
-			{  0.0f, 1.0f, 0.0f, 0xffffffff, },
 
-		};
-		if( FAILED( hr = GetD3D9Device()->CreateVertexBuffer( 3 * sizeof( YYFVF ),
-			0 , D3DFVF_YYFVF , D3DPOOL_MANAGED , &vertex_buf, NULL ))) 
-			return ;
-		VOID* pVertices;
-		if( FAILED( hr = vertex_buf->Lock( 0, sizeof( g_Vertices ), ( void** )&pVertices, 0 )))    
-			return;
-		memcpy( pVertices, g_Vertices, sizeof( g_Vertices ));
-		vertex_buf->Unlock( );
-		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
-		GetD3D9Device()->SetRenderState(D3DRS_STENCILENABLE,TRUE);
 		YYUTDialogResourceManager::GetInstance()->SetHWND(GetHWND());
 		YYUTDialogResourceManager::GetInstance()->OnD3DCreateDevice(GetD3D9Device());
+		D3DXVECTOR3 eye( 0.0f , 3.0f , -50.0f );
+		D3DXVECTOR3 lookat( 0.0f, 0.0f, 0.0f );
+
+		camera_.SetHWND(GetHWND());
+		//camera_.SetButtonMasks();
+		camera_.SetViewParam(&eye,&lookat);
 		robot_mesh_=make_shared<YYUTObjectX>();
 		robot_mesh_->Init(GetD3D9Device());
 		robot_mesh_->LoadObject(_T("..//media//robot.x"));
@@ -72,31 +66,19 @@ namespace YYUT
 	}
 
 	void YYGame::GameMain(double time_span, double time_elapse)
-{
+	{
+		camera_.FrameMove(time_elapse);
 		GetD3D9Device()->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_STENCIL|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 100, 0, 0 ), 1.0f, 0 );
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
-			static float ftime=0;
-			ftime+=(float)time_elapse*30;
-			if(ftime>=360)
-				ftime=0.0f;
-			FLOAT fAngle = ftime*D3DX_PI/180;
-			D3DXMATRIX world;
-			D3DXMatrixRotationY(&world,fAngle);
+			D3DXMATRIX world,view,proj;
+			world=*camera_.GetWorldMatrix();
+			view=*camera_.GetViewMatrix();
+			proj=*camera_.GetProjMatrix();
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
-			D3DXVECTOR3 vEyePt( 0.0f , 3.0f , -50.0f );
-			D3DXVECTOR3 vLookatPt( 0.0f, 0.0f, 0.0f );
-			D3DXVECTOR3 vUpVec( 0.0f, 1.0f, 0.0f );
-			D3DXMATRIX matView;
-			D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
-			GetD3D9Device()->SetTransform(D3DTS_VIEW,&matView);
-			D3DXMATRIX pro;
-			D3DXMatrixPerspectiveFovLH(&pro,D3DX_PI/4,1.0f,1.0f,100.f);
-			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&pro);
+			GetD3D9Device()->SetTransform(D3DTS_VIEW,&view);
+			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&proj);
 
-			/*GetD3D9Device()->SetStreamSource(0,vertex_buf,0,sizeof(YYFVF));
-			GetD3D9Device()->SetFVF(D3DFVF_YYFVF);
-			GetD3D9Device()->DrawPrimitive(D3DPT_TRIANGLESTRIP,0,1);*/
 			GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
 			robot_mesh_->Draw();	
 			hud_->OnRender(time_span);	
@@ -127,6 +109,8 @@ namespace YYUT
 			if(further_process)
 			return 0;
 		}
+		camera_.HandleMessage(hWnd,uMsg,wParam,lParam);
+		
 		further_process=false;
 		return 0;
 	}
