@@ -32,6 +32,7 @@ namespace YYUT
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
 		std::shared_ptr<YYUTObjectX> robot_mesh_;
+		std::shared_ptr<YYUTObjectX> cell_mesh_;
 	};
 
 }

@@ -45,15 +45,34 @@ namespace YYUT
 
 		YYUTDialogResourceManager::GetInstance()->SetHWND(GetHWND());
 		YYUTDialogResourceManager::GetInstance()->OnD3DCreateDevice(GetD3D9Device());
-		D3DXVECTOR3 eye( 0.0f , 3.0f , -50.0f );
-		D3DXVECTOR3 lookat( 0.0f, 0.0f, 0.0f );
+		
+		robot_mesh_=make_shared<YYUTObjectX>();
+		robot_mesh_->Init(GetD3D9Device());
+		robot_mesh_->LoadObject(_T("..//media//robot.x"));
+		cell_mesh_=make_shared<YYUTObjectX>();
+		cell_mesh_->Init(GetD3D9Device());
+		cell_mesh_->LoadObject(_T("..//media//cell.x"));
+		byte* vertex_buf=nullptr;
+		auto mesh=robot_mesh_->GetMesh();
+		mesh->LockVertexBuffer(0, (void**)&vertex_buf);
+		D3DXVECTOR3 center;
+		float radius;
+		 hr = D3DXComputeBoundingSphere((D3DXVECTOR3*)vertex_buf, mesh->GetNumVertices(),
+			D3DXGetFVFVertexSize(mesh->GetFVF()), &center, &radius);
+		if(FAILED(hr))
+			BOOST_THROW_EXCEPTION(YYUTException()<<err_str("caculation model radius error")<<err_hr(hr));
+		if(radius<=0)
+		{
+			radius =100.0f;
+		}
+		cout<<radius<<endl;
+		mesh->UnlockVertexBuffer();
+		D3DXVECTOR3 eye(0.0f , 0.0f,-radius*30);
+		D3DXVECTOR3 lookat( 0.0f, 0.0f, 1.0f );
 
 		camera_.SetHWND(GetHWND());
 		//camera_.SetButtonMasks();
 		camera_.SetViewParam(&eye,&lookat);
-		robot_mesh_=make_shared<YYUTObjectX>();
-		robot_mesh_->Init(GetD3D9Device());
-		robot_mesh_->LoadObject(_T("..//media//robot.x"));
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -81,6 +100,12 @@ namespace YYUT
 
 			GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
 			robot_mesh_->Draw();	
+			D3DXMatrixIdentity(&world);
+			D3DXMATRIX scale;
+			D3DXMatrixScaling(&scale,5.0f,5.0f,5.0f);
+			world*=scale;
+			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
+			cell_mesh_->Draw();
 			hud_->OnRender(time_span);	
 			GetD3D9Device()->EndScene();
 		}

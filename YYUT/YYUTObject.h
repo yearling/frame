@@ -19,6 +19,7 @@ namespace YYUT{
 		virtual void LoadObject(wstring file_name);
 		virtual void Draw();
 		void Init(CComPtr<IDirect3DDevice9> d3d_dev);
+		CComPtr<ID3DXMesh> GetMesh(){ return mesh_;}
 	protected:
 		CComPtr<ID3DXMesh> mesh_;
 		CComPtr<IDirect3DDevice9> d3d_dev_;

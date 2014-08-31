@@ -58,11 +58,11 @@
     <ClCompile Include="..\YYUT\YYUTMangager.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
-    <ClCompile Include="..\YYUT\YYUTCamera.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\YYUT\YYUTObject.cpp">
-      <Filter>源文件</Filter>
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTCamera.cpp">
+      <Filter>YYUT\Cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,8 @@
 #include "YYUTMutiScreen.h"
 #include "YYUTCamera.h"
 #include <xutility>
-#if defined( DEBUG ) || defined( _DEBUG )#include <iostream>
+#if defined( DEBUG ) || defined( _DEBUG )
+#include <iostream>
 using std::cout;
 using std::endl;
 #endif
@@ -54,15 +55,14 @@ namespace YYUT
 
 	void YYUTArcBall::OnBegin(int x,int y)
 	{
-		if(x>=offset_.x && x<offset_.x+width_ && y>=offset_.y && y>=offset_.y+height_)
+		if(x>=offset_.x && x<=offset_.x+width_ && y>=offset_.y && y<=offset_.y+height_)
 		{
 			drag_=true;
 			down_qua_=now_qua_;
 			down_vec_=ScreenToVector((float)x,(float)y);
 		}
 	}
-	//TODO 
-	//totoally don't understande 
+	
 	D3DXVECTOR3 YYUTArcBall::ScreenToVector(float screen_x,float screen_y)
 	{
 		float x=-(screen_x-offset_.x-width_/2)/(radius_*width_/2);
@@ -485,7 +485,7 @@ namespace YYUT
 		D3DXMatrixIdentity(&model_last_rot_);
 		D3DXMatrixIdentity(&camera_rot_last_);
 		model_center_=D3DXVECTOR3(0,0,0);
-		radius_=5.0f;
+		radius_=40.0f;
 		default_radius_=5.0f;
 		min_radius_=1.0f;
 		max_radius_=FLT_MAX;
@@ -615,7 +615,6 @@ namespace YYUT
 			((uMsg==WM_MBUTTONDOWN || uMsg==WM_MBUTTONDBLCLK) && rotate_model_button_mask_ & MOUSE_MIDDLE_BUTTON)||
 			((uMsg==WM_RBUTTONDOWN || uMsg==WM_RBUTTONDBLCLK) && rotate_model_button_mask_ & MOUSE_RIGHT_BUTTON))
 		{
-			cout<<"lbutton down"<<endl;
 			int x=(short)LOWORD(lParam);
 			int y=(short)HIWORD(lParam);
 			world_arcball_.OnBegin(x,y);
