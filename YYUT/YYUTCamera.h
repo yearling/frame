@@ -46,7 +46,6 @@ namespace YYUT
 		D3DXVECTOR3 now_vec_;
 		D3DXVECTOR3 ScreenToVector(float streen_x,float screen_y);
 	};
-
 	enum YYUT_CameraKeys
 	{
 		CAM_STRAFE_LEFT=0,
@@ -166,6 +165,22 @@ namespace YYUT
 		D3DXVECTOR3 max_boundary_;
 		bool reset_cursor_after_move_;
 		HWND hwnd_;
+	};
+	class YYUTEASYCamera:public YYUTBaseCamera
+	{
+	public:
+		YYUTEASYCamera();
+		~YYUTEASYCamera();
+		virtual bool HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+		virtual void FrameMove(float elapse_time);
+		const D3DXMATRIX * GetWorldMatrix() const { return & world_;}
+		void SetWindow(int width,int height,float arcball_radius=0.9f)
+		{
+			world_arcball_.SetWindow(width,height,arcball_radius);
+		}
+	protected:
+		D3DXMATRIX world_;
+		YYUTArcBall world_arcball_;
 	};
 	class YYUTModelViewerCamera:public YYUTBaseCamera
 	{

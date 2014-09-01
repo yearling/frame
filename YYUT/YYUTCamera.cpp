@@ -65,8 +65,8 @@ namespace YYUT
 	
 	D3DXVECTOR3 YYUTArcBall::ScreenToVector(float screen_x,float screen_y)
 	{
-		float x=-(screen_x-offset_.x-width_/2)/(radius_*width_/2);
-		float y=(screen_y-offset_.y-height_/2)/(radius_*height_/2);
+		float x=(screen_x-offset_.x-width_/2)/(radius_*width_/2);
+		float y=-(screen_y-offset_.y-height_/2)/(radius_*height_/2);
 		float z=0.0f;
 		float mag=x*x+y*y;
 		if(mag>1.0f)
@@ -76,7 +76,7 @@ namespace YYUT
 			y*=scale;
 		}
 		else
-			z=sqrtf(1.0f-mag);
+			z=-sqrtf(1.0f-mag);
 		return D3DXVECTOR3(x,y,z);
 	}
 
@@ -686,5 +686,53 @@ namespace YYUT
 		return false;
 	}
 
+
+
+	YYUTEASYCamera::YYUTEASYCamera()
+	{
+
+	}
+
+	bool YYUTEASYCamera::HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+	{
+		YYUTBaseCamera::HandleMessage(hwnd,uMsg,wParam,lParam);
+		if(uMsg==WM_LBUTTONDOWN )
+		{
+			int x=(short)LOWORD(lParam);
+			int y=(short)HIWORD(lParam);
+			world_arcball_.OnBegin(x,y);
+		}
+		 
+		if(uMsg==WM_MOUSEMOVE)
+		{
+			int x=(short)LOWORD(lParam);
+			int y=(short)HIWORD(lParam);
+			world_arcball_.OnMove(x,y);
+		}
+		if(uMsg==WM_LBUTTONUP)
+		{
+			int x=(short)LOWORD(lParam);
+			int y=(short)HIWORD(lParam);
+			world_arcball_.OnEnd();
+		}
+		if(uMsg==WM_CAPTURECHANGED)
+		{
+			if(hwnd!=(HWND)lParam)
+			{
+					world_arcball_.OnEnd();
+			}
+		}
+		return false;
+	}
+
+	void YYUTEASYCamera::FrameMove(float elapse_time)
+	{
+		world_=*world_arcball_.GetRotationMatrix();
+	}
+
+	YYUTEASYCamera::~YYUTEASYCamera()
+	{
+
+	}
 
 }
