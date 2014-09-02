@@ -461,8 +461,8 @@ void YYUT::YYUTManager::Initial()
 		FreeLibrary( hUser32 );
 	}
 	YYUTTimer::GetInstance().Reset();
-	int default_x=800;
-	int default_y=600;
+	int default_x=1920;
+	int default_y=1080;
 	try
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
@@ -473,7 +473,7 @@ void YYUT::YYUTManager::Initial()
 		SetHWNDFocus(main_window->hwnd);
 		SetHWNDDeviceWindowed(main_window->hwnd);
 		SetHWNDDeviceFullScreen(main_window->hwnd);
-		CreateDevice(true,800,600);
+		CreateDevice(true,default_x,default_y);
 		GameInit();
 	}
 	catch(YYUTWidnowException &e)

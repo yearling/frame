@@ -38,7 +38,7 @@ namespace YYUT
 		D3DXVECTOR2 center_;// center of the arc ball
 		float radius_;//radius in screen coords
 		float radius_tranlation_;//arc ball's radius for translating the target
-		D3DXQUATERNION down_qua_;//quaternion before button down
+		D3DXQUATERNION pre_rotate_;//quaternion before button down
 		D3DXQUATERNION now_qua_;//quaternion for current drag
 		bool drag_;//whether user is dragging arc ball 
 		POINT last_mouse_;
@@ -128,13 +128,13 @@ namespace YYUT
 		D3DXMATRIX view_;
 		D3DXMATRIX pro_;
 		int keys_down_;
-		byte key_mask_[CAM_MAX_KEYS];
+		byte key_mask_[CAM_MAX_KEYS];//存放各CAM的状态，主要是key控制的状态
 		D3DXVECTOR3 keyboard_direction_;
 		POINT last_mouse_position_;
 		bool mouse_lbutton_down_;
 		bool mouse_mbutton_down_;
 		bool mouse_rbutton_down_;
-		int current_button_mask_;
+		int current_button_mask_;//存放各种由mouse控制的state
 		int mouse_wheel_delta_;
 		D3DXVECTOR2 mouse_delta_;
 		float frames_to_smooth_mouse_delta_;
@@ -177,10 +177,16 @@ namespace YYUT
 		void SetWindow(int width,int height,float arcball_radius=0.9f)
 		{
 			world_arcball_.SetWindow(width,height,arcball_radius);
+			view_arcball_.SetWindow(width,height,arcball_radius);
 		}
+		void SetRaius(float radius){ radius_=radius;}
 	protected:
 		D3DXMATRIX world_;
+		YYUTArcBall view_arcball_;
 		YYUTArcBall world_arcball_;
+		float radius_;
+		D3DXMATRIX last_world_rotate;
+		D3DXMATRIX final_world_rotate;
 	};
 	class YYUTModelViewerCamera:public YYUTBaseCamera
 	{
@@ -203,9 +209,8 @@ namespace YYUT
 		{
 			world_arcball_.SetWindow(width,height,arcball_radius);
 			view_arcball_.SetWindow(width,height,arcball_radius);
-
 		}
-		void SetRadius(float default_radius=5.0f,float min_radius=1.0f,float max_radius=FLT_MAX)
+		void SetRadius(float default_radius=15.0f,float min_radius=1.0f,float max_radius=FLT_MAX)
 		{
 			default_radius_=default_radius;
 			min_radius_=min_radius;
@@ -222,6 +227,7 @@ namespace YYUT
 		YYUTArcBall view_arcball_;
 		D3DXVECTOR3 model_center_;
 		D3DXMATRIX model_last_rot_;
+		D3DXMATRIX camera_rot_last_;
 		D3DXMATRIX model_rot_;
 		D3DXMATRIX world_;
 		int rotate_model_button_mask_;
@@ -234,7 +240,6 @@ namespace YYUT
 		float min_radius_;
 		float max_radius_;
 		bool drag_since_last_update_;
-		D3DXMATRIX camera_rot_last_;
 	};
 }
 #endif

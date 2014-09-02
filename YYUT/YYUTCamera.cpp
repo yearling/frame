@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "YYUTMutiScreen.h"
 #include "YYUTCamera.h"
 #include <xutility>
@@ -12,7 +12,7 @@ namespace YYUT
 
 	void YYUTArcBall::Reset()
 	{
-		D3DXQuaternionIdentity(&down_qua_);
+		D3DXQuaternionIdentity(&pre_rotate_);
 		D3DXQuaternionIdentity(&now_qua_);
 		D3DXMatrixIdentity(&rotation_);
 		D3DXMatrixIdentity(&translation_);
@@ -48,23 +48,19 @@ namespace YYUT
 	D3DXQUATERNION YYUTArcBall::QuaternionFromBallPoints(const D3DXVECTOR3 &from,const D3DXVECTOR3 & to)
 	{
 		D3DXVECTOR3 part;
+		//from 和 to 都是单位向量，所以点乘的结果就是cos⁡θ
 		float fdot=D3DXVec3Dot(&from,&to);
+		//from 和 to 都是单位向量，所点叉乘的结果可能不是单位向量，模为|A||B|*sin⁡θ
+		//所以A/sin⁡θ才得到单位向量，然后四元数的向量部分是A*sin⁡θ，所以就是quaternion(AXB,A.B)的结果了。
 		D3DXVec3Cross(&part,&from,&to);
 		return D3DXQUATERNION(part.x,part.y,part.z,fdot);
 	}
 
-	void YYUTArcBall::OnBegin(int x,int y)
-	{
-		if(x>=offset_.x && x<=offset_.x+width_ && y>=offset_.y && y<=offset_.y+height_)
-		{
-			drag_=true;
-			down_qua_=now_qua_;
-			down_vec_=ScreenToVector((float)x,(float)y);
-		}
-	}
+	
 	
 	D3DXVECTOR3 YYUTArcBall::ScreenToVector(float screen_x,float screen_y)
 	{
+		//设为左手坐标系，前Z正，右X正，上Y正，这样子我们操作的是负Z半轴的那个球
 		float x=(screen_x-offset_.x-width_/2)/(radius_*width_/2);
 		float y=-(screen_y-offset_.y-height_/2)/(radius_*height_/2);
 		float z=0.0f;
@@ -79,13 +75,23 @@ namespace YYUT
 			z=-sqrtf(1.0f-mag);
 		return D3DXVECTOR3(x,y,z);
 	}
-
+	void YYUTArcBall::OnBegin(int x,int y)
+	{
+		if(x>=offset_.x && x<=offset_.x+width_ && y>=offset_.y && y<=offset_.y+height_)
+		{
+			drag_=true;
+			//down_qua_用来记录上次旋转的结果
+			pre_rotate_=now_qua_;
+			//down_vec_靠这个来标识起点
+			down_vec_=ScreenToVector((float)x,(float)y);
+		}
+	}
 	void YYUTArcBall::OnMove(int x,int y)
 	{
 		if(drag_)
 		{
 			now_vec_=ScreenToVector((float)x,(float)y);
-			now_qua_=down_qua_*QuaternionFromBallPoints(down_vec_,now_vec_);
+			now_qua_=pre_rotate_*QuaternionFromBallPoints(down_vec_,now_vec_);
 		}
 	}
 
@@ -198,7 +204,17 @@ namespace YYUT
 		default_lookat_=lookat_= *lookat;
 		D3DXVECTOR3 up(0,1,0);
 		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,&up);
-		//��pitch ��yaw
+		//先pitch 再yaw
+		//得到的view其实是视坐标基的逆，所以要先进行一次逆得到视坐标的基
+		//然后得到Z轴坐标，进行计算。
+		//因为是先pitch再yaw，也就是说，先绕x轴，再绕y轴把z轴从世界坐标绕到现在的视坐标
+		//旋转保持轴长度不变和向量到旋转轴的距离不变。
+		//1.绕X轴把Z轴转到YZ平面
+		//2.绕Y轴把Z轴转到位置
+		//如果要计算的话要反过来算,先算2
+		//就是Z轴现在的位置绕Y轴转到YZ平面上，投影到XZ平面上，角度为-arctan(x/z),反过来也就是2，就是arctan(x/z)
+		//然后因为刚才绕Y轴旋转，投影到XZ平面上的sqrt(x^2+z^2)长度不变，就是现在Y轴投到Z轴上的长度，
+		//所以绕X轴的旋角为arctan(y,sqrt(x^2+z^2)),角度从Z到Y，反方向，取负
 		D3DXMATRIX inverse_view;
 		D3DXMatrixInverse(&inverse_view,NULL,&view_);
 		D3DXVECTOR3 * z_basis=(D3DXVECTOR3*)&inverse_view._31;
@@ -215,7 +231,7 @@ namespace YYUT
 		far_plane_=far_plane;
 		D3DXMatrixPerspectiveFovLH(&pro_,FOV_,aspect_,near_plane_,far_plane_);
 	}
-
+	//通过接收windos message来设置某些状态位
 	bool YYUTBaseCamera::HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	{
 		switch(uMsg)
@@ -321,7 +337,7 @@ namespace YYUT
 		}
 		return false;
 	}
-
+	//把按键映射成CAM的虚拟码
 	YYUT_CameraKeys YYUTBaseCamera::MapKey(UINT key)
 	{
 		switch( key )
@@ -439,7 +455,7 @@ namespace YYUT
 			{
 				velocity_=accel;
 				drag_timer_=total_drag_time_to_zero_;
-				velocity_drag_=accel/drag_timer_;//���ٶ�
+				velocity_drag_=accel/drag_timer_;//加速度
 			}
 			else
 			{
@@ -485,8 +501,7 @@ namespace YYUT
 		D3DXMatrixIdentity(&model_last_rot_);
 		D3DXMatrixIdentity(&camera_rot_last_);
 		model_center_=D3DXVECTOR3(0,0,0);
-		radius_=40.0f;
-		default_radius_=5.0f;
+		default_radius_=15.0f;
 		min_radius_=1.0f;
 		max_radius_=FLT_MAX;
 		limit_pitch_=false;
@@ -496,6 +511,8 @@ namespace YYUT
 		zoom_button_mask_=MOUSE_WHEEL;
 		rotate_camera_button_mask_=MOUSE_RIGHT_BUTTON;
 		drag_since_last_update_=true;
+		radius_=35.0f;
+		D3DXMatrixIdentity(&world_);
 	}
 
 	YYUTModelViewerCamera::~YYUTModelViewerCamera()
@@ -521,32 +538,33 @@ namespace YYUT
 		radius_=(std::max)(min_radius_,radius_);
 		mouse_wheel_delta_=0;
 		D3DXMATRIX camera_rot;
+		//把摄像头移动的方向取反，这样子看着比较舒服，操作正方向，不是把基变，还是基坐标
 		D3DXMatrixInverse(&camera_rot,NULL,view_arcball_.GetRotationMatrix());
 		D3DXVECTOR3 world_up,world_ahead;
 		D3DXVECTOR3 local_up=D3DXVECTOR3(0,1,0);
 		D3DXVECTOR3 local_ahead=D3DXVECTOR3(0,0,1);
 		D3DXVec3TransformCoord(&world_up,&local_up,&camera_rot);
 		D3DXVec3TransformCoord(&world_ahead,&local_ahead,&camera_rot);
-
-		D3DXVECTOR3 pos_delta_world;
-		D3DXVec3TransformCoord( &pos_delta_world,&pos_delta,&camera_rot);
-
-		lookat_+=pos_delta_world;
+		//变化是在摄像头空间里变化的，变为world空间
+		//D3DXVECTOR3 pos_delta_world;
+		//D3DXVec3TransformCoord( &pos_delta_world,&pos_delta,&camera_rot);
+		//lookat=物体位置+之前位置
+		/*lookat_+=pos_delta_world;
 		if(clip_to_boundary_)
-			ConstrainToBoundary(&lookat_);
+			ConstrainToBoundary(&lookat_);*/
 		eye_=lookat_-world_ahead*radius_;
 		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,&world_up);
-
+		//视变换坐标取逆得到视坐标的基，并且至于原点处
 		D3DXMATRIX invert_view;
 		D3DXMatrixInverse(&invert_view,NULL,&view_);
-		invert_view._41=invert_view._42=invert_view._43=0;
+		//invert_view._41=invert_view._42=invert_view._43=0;
 		D3DXMATRIX invert_model_last_rot;
 		D3DXMatrixInverse(&invert_model_last_rot,NULL,&model_last_rot_);
 
 		D3DXMATRIX model_rot;
 		model_rot=*world_arcball_.GetRotationMatrix();
 		model_rot_*=view_*invert_model_last_rot*model_rot*invert_view;
-
+		//这个时候也不知道旋转到哪了，反正最后放到lookat的位置就行了
 		if(view_arcball_.IsBeingDragged() && attach_camera_to_model_ && !IsKeyDown(key_mask_[CAM_CONTROLDOWN]))
 		{
 			D3DXMATRIX invert_camera_last_rot;
@@ -636,7 +654,7 @@ namespace YYUT
 		}
 		if(((uMsg==WM_LBUTTONUP) && rotate_model_button_mask_ & MOUSE_LEFT_BUTTON)||
 			((uMsg==WM_MBUTTONUP) && rotate_model_button_mask_ & MOUSE_MIDDLE_BUTTON)||
-			((uMsg==WM_RBUTTONDOWN ) && rotate_model_button_mask_ & MOUSE_RIGHT_BUTTON))
+			((uMsg==WM_RBUTTONUP ) && rotate_model_button_mask_ & MOUSE_RIGHT_BUTTON))
 		{
 			int x=(short)LOWORD(lParam);
 			int y=(short)HIWORD(lParam);
@@ -644,7 +662,7 @@ namespace YYUT
 		}
 		if(((uMsg==WM_LBUTTONUP) && rotate_camera_button_mask_ & MOUSE_LEFT_BUTTON)||
 			((uMsg==WM_MBUTTONUP) && rotate_camera_button_mask_ & MOUSE_MIDDLE_BUTTON)||
-			((uMsg==WM_RBUTTONDOWN ) && rotate_camera_button_mask_ & MOUSE_RIGHT_BUTTON))
+			((uMsg==WM_RBUTTONUP ) && rotate_camera_button_mask_ & MOUSE_RIGHT_BUTTON))
 		{
 			int x=(short)LOWORD(lParam);
 			int y=(short)HIWORD(lParam);
@@ -684,13 +702,17 @@ namespace YYUT
 			drag_since_last_update_ = true;
 		}
 		return false;
+		
 	}
 
 
 
 	YYUTEASYCamera::YYUTEASYCamera()
 	{
-
+		radius_=10.0f;
+		D3DXMatrixIdentity(&world_);
+		D3DXMatrixIdentity(&last_world_rotate);
+		D3DXMatrixIdentity(&final_world_rotate);
 	}
 
 	bool YYUTEASYCamera::HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -702,12 +724,18 @@ namespace YYUT
 			int y=(short)HIWORD(lParam);
 			world_arcball_.OnBegin(x,y);
 		}
-		 
+		if(uMsg==WM_RBUTTONDOWN )
+		{
+			int x=(short)LOWORD(lParam);
+			int y=(short)HIWORD(lParam);
+			view_arcball_.OnBegin(x,y);
+		} 
 		if(uMsg==WM_MOUSEMOVE)
 		{
 			int x=(short)LOWORD(lParam);
 			int y=(short)HIWORD(lParam);
 			world_arcball_.OnMove(x,y);
+			view_arcball_.OnMove(x,y);
 		}
 		if(uMsg==WM_LBUTTONUP)
 		{
@@ -715,6 +743,15 @@ namespace YYUT
 			int y=(short)HIWORD(lParam);
 			world_arcball_.OnEnd();
 		}
+		if(uMsg==WM_RBUTTONUP)
+		{
+			int x=(short)LOWORD(lParam);
+			int y=(short)HIWORD(lParam);
+			view_arcball_.OnEnd();
+		}
+
+
+
 		if(uMsg==WM_CAPTURECHANGED)
 		{
 			if(hwnd!=(HWND)lParam)
@@ -727,7 +764,27 @@ namespace YYUT
 
 	void YYUTEASYCamera::FrameMove(float elapse_time)
 	{
-		world_=*world_arcball_.GetRotationMatrix();
+		D3DXMATRIX view_arcball;
+		D3DXMatrixInverse(&view_arcball,nullptr,view_arcball_.GetRotationMatrix());
+		D3DXVECTOR3 local_ahead(0.0f,0.0f,1.0f);
+		D3DXVECTOR3 local_up(0.0f,1.0f,0.0f);
+		D3DXVECTOR3 world_lookat,world_up;
+		D3DXVec3TransformCoord(&world_up,&local_up,&view_arcball);
+		D3DXVec3TransformCoord(&world_lookat,&local_ahead,&view_arcball);
+		eye_=lookat_-world_lookat*radius_;
+		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,&world_up);
+		D3DXMATRIX view_inverse;
+		D3DXMATRIX world_rotate_view=*world_arcball_.GetRotationMatrix();
+		D3DXMATRIX last_world_rotate_invert;
+		D3DXMatrixInverse(&last_world_rotate_invert,nullptr,&last_world_rotate);
+		D3DXMatrixInverse(&view_inverse,nullptr,&view_);
+		final_world_rotate*=view_*last_world_rotate_invert*world_rotate_view*view_inverse;
+		//这个时候也不知道旋转哪去了，who care,最后把那放到指定位置就行了。
+		world_=final_world_rotate;
+		world_._41=lookat_.x;
+		world_._42=lookat_.y;
+		world_._43=lookat_.z;
+		last_world_rotate=world_rotate_view;
 	}
 
 	YYUTEASYCamera::~YYUTEASYCamera()

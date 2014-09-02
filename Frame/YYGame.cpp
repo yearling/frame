@@ -68,12 +68,12 @@ namespace YYUT
 		}
 		cout<<radius<<endl;
 		mesh->UnlockVertexBuffer();
-		D3DXVECTOR3 eye(0.0f , 0.0f,-radius*3);
+		D3DXVECTOR3 eye(0.0f , 0.0f,radius*3);
 		D3DXVECTOR3 lookat( 0.0f, 0.0f, 1.0f );
 
 		camera_.SetHWND(GetHWND());
-		//camera_.SetButtonMasks();
 		camera_.SetViewParam(&eye,&lookat);
+		//camera_.SetRaius(3*radius);
 	}
 	catch(YYUTGUIException &e)
 	{
