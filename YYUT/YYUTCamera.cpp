@@ -392,6 +392,7 @@ namespace YYUT
 
 	void YYUTBaseCamera::GetInput(bool get_keyboard_input,bool get_mouse_input,bool reset_cursor_after_move)
 	{
+		reset_cursor_after_move_=reset_cursor_after_move;
 		keyboard_direction_=D3DXVECTOR3(0,0,0);
 		if(get_keyboard_input)
 		{
@@ -428,10 +429,9 @@ namespace YYUT
 		if(reset_cursor_after_move_)
 		{
 			POINT center;
-			CMutiScreen *ms=GetMutiScreen();
-			RECT rc=ms->GetRect(CMutiScreen::m_hPrimior);
-			center.x=(rc.left+rc.right)/2;
-			center.y=(rc.top+rc.bottom)/2;
+			center.x=(width_)/2;
+			center.y=(height_)/2;
+			::ClientToScreen(hwnd_,&center);
 			SetCursorPos(center.x,center.y);
 			last_mouse_position_=center;
 		}
@@ -790,6 +790,48 @@ namespace YYUT
 	YYUTEASYCamera::~YYUTEASYCamera()
 	{
 
+	}
+
+
+	YYUTFirstPersonCamera::YYUTFirstPersonCamera()
+	{
+		enable_position_movement_=true;
+		reset_cursor_after_move_=true;
+		ShowCursor(false);
+	}
+
+	YYUTFirstPersonCamera::~YYUTFirstPersonCamera()
+	{
+
+	}
+
+	void YYUTFirstPersonCamera::FrameMove(float elapse_time)
+	{
+		if(IsKeyDown(key_mask_[CAM_RESET]))
+			Reset();
+		GetInput(enable_position_movement_,true,reset_cursor_after_move_);
+		UpdateVelocity(elapse_time);
+		D3DXVECTOR3 pos_delta=velocity_*elapse_time;
+		float yaw_delta=rot_velocity.x;
+		float pitch_delta=rot_velocity.y;
+		camera_yaw_angle_+=yaw_delta;
+		camera_pitch_angle_+=pitch_delta;
+		//上下伏仰限制在+-90度
+		camera_pitch_angle_=(std::max)(-D3DX_PI/2,camera_pitch_angle_);
+		camera_pitch_angle_=(std::min)(D3DX_PI/2,camera_pitch_angle_);
+		D3DXMATRIX camera_rot;
+		D3DXMatrixRotationYawPitchRoll(&camera_rot,camera_yaw_angle_,camera_pitch_angle_,0);
+		D3DXVECTOR3 world_up,world_ahead;
+		D3DXVECTOR3 local_up(0,1,0);
+		D3DXVECTOR3 local_ahead(0,0,1);
+		D3DXVec3TransformCoord(&world_up,&local_up,&camera_rot);
+		D3DXVec3TransformCoord(&world_ahead,&local_ahead,&camera_rot);
+		D3DXVECTOR3 world_pos_delta;
+		D3DXVec3TransformCoord(&world_pos_delta,&pos_delta,&camera_rot);
+		eye_+=world_pos_delta;
+		lookat_=eye_+world_ahead;
+		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,&world_up);
+		D3DXMatrixInverse(&camera_world_,nullptr,&view_);
 	}
 
 }

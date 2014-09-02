@@ -29,7 +29,7 @@ namespace YYUT
 		void HUDRest();
 		void HUDInit();
 		//YYUTEASYCamera camera_;
-		YYUTModelViewerCamera camera_;
+		YYUTFirstPersonCamera camera_;
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
 		std::shared_ptr<YYUTObjectX> robot_mesh_;

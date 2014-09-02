@@ -82,6 +82,7 @@ namespace YYUT
 		virtual void SetDragRect(RECT &rc) {drag_rc_=rc;}
 		void SetInvertPitch(bool invert){invert_pitch_=invert;}
 		void SetHWND(HWND hwnd){ hwnd_=hwnd;}
+		void SetWindow(int width,int height){width_=width;height_=height;}
 		void SetDrag(bool movement_drag,float total_drag_time_to_zero=0.25f)
 		{
 			movement_drag_=movement_drag;
@@ -165,6 +166,8 @@ namespace YYUT
 		D3DXVECTOR3 max_boundary_;
 		bool reset_cursor_after_move_;
 		HWND hwnd_;
+		int width_;
+		int height_;
 	};
 	class YYUTEASYCamera:public YYUTBaseCamera
 	{
@@ -207,6 +210,7 @@ namespace YYUT
 		void SetAttachCameraTomodel(bool enable=false){ attach_camera_to_model_=enable;}
 		void SetWindow(int width,int height,float arcball_radius=0.9f)
 		{
+			YYUTBaseCamera::SetWindow(width,height);
 			world_arcball_.SetWindow(width,height,arcball_radius);
 			view_arcball_.SetWindow(width,height,arcball_radius);
 		}
@@ -240,6 +244,20 @@ namespace YYUT
 		float min_radius_;
 		float max_radius_;
 		bool drag_since_last_update_;
+	};
+	class YYUTFirstPersonCamera:public YYUTBaseCamera
+	{
+	public:
+		YYUTFirstPersonCamera();
+		virtual ~YYUTFirstPersonCamera();
+		virtual void FrameMove(float elapse_time);
+		D3DXMATRIX* GetWroldMatrix() { return & camera_world_;}
+		const D3DXVECTOR3 * GetEye() { return (D3DXVECTOR3*)&camera_world_._41;}
+		const D3DXVECTOR3 * GetWorldRight() const { return (D3DXVECTOR3*)&camera_world_._11;}
+		const D3DXVECTOR3 * GetWorldUp() const { return (D3DXVECTOR3*)&camera_world_._21;}
+		const D3DXVECTOR3 * GetWorldAhead() const { return (D3DXVECTOR3*)&camera_world_._31;}
+	protected:
+		D3DXMATRIX camera_world_;
 	};
 }
 #endif

@@ -28,6 +28,7 @@ namespace YYUT
 		float aspect=(float)width/(float)height;
 		camera_.SetProjParam(D3DX_PI/4,aspect,1.0f,1000.0f);
 		camera_.SetWindow(width,height);
+		//camera_.SetWindow(width,height);
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -92,9 +93,9 @@ namespace YYUT
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
 			D3DXMATRIX world,view,proj;
-			world=*camera_.GetWorldMatrix();
 			view=*camera_.GetViewMatrix();
 			proj=*camera_.GetProjMatrix();
+			D3DXMatrixIdentity(&world);
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
 			GetD3D9Device()->SetTransform(D3DTS_VIEW,&view);
 			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&proj);

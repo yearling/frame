@@ -250,14 +250,14 @@ namespace YYUT
 			{
 				if(pMS->m_nNumber>=2)
 				{
-					::SetWindowPos(hWnd,HWND_TOP,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+					::SetWindowPos(hWnd,HWND_TOP,rc.left+200,rc.top+200,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
 				}
 				else
 				{
 					if(after)
-						::SetWindowPos(hWnd,after,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+						::SetWindowPos(hWnd,after,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
 					else
-						::SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW );
+						::SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
 				}
 			}
 			//找到visual studio的窗口并把它设到副窗口
