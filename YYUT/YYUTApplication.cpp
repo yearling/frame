@@ -41,7 +41,6 @@ namespace YYUT
 	int YYUTApplication::Run()
 	{
 		MSG msg;
-		DWORD last_time=timeGetTime();
 		while (1)
 		{
 			while (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
@@ -52,7 +51,6 @@ namespace YYUT
 				DispatchMessage(&msg);
 			}
 			DWORD current_time=timeGetTime();
-			last_time=current_time;
 		}
 		return static_cast<int>(msg.wParam);
 	}
