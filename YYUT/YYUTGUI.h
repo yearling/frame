@@ -38,9 +38,6 @@ namespace YYUT
 	struct YYUTTextureNode
 	{
 		YYUTTextureNode();
-		bool file_source_;
-		HMODULE resource_module_;
-		int resource_id_;
 		wstring file_name_;
 		long width_;
 		long heigth_;
@@ -85,19 +82,13 @@ namespace YYUT
 		void SetTexture(string index_texture,RECT *prc_textrue,D3DCOLOR default_texture_color=D3DCOLOR_ARGB(255,255,255,255));
 		void SetFont(string index_font,D3DCOLOR default_font_color=D3DCOLOR_ARGB(255,255,255,255),DWORD text_format=DT_CENTER| DT_VCENTER);
 		void Refresh();
-		string index_texture_;
-		string index_font_;
+		string texture_id_;
+		string font_id_;
 		DWORD text_format_;
 		RECT rect_texture_;
 		YYUTBlendColor texture_color_;
 		YYUTBlendColor font_color_;
-	};
-	struct YYUTElementHolder
-	{
-		UINT control_type_;
-		UINT element_index_;
-		YYUTElement element_;
-		bool operator==(const YYUTElementHolder &p) const;		
+		string element_id_;
 	};
 	class YYUTDialog:public std::enable_shared_from_this<YYUTDialog>,boost::noncopyable
 	{
@@ -115,6 +106,7 @@ namespace YYUT
 		shared_ptr<YYUTButton> AddButton(int ID,wstring text,int x,int y,int width,int height,UINT hot_key=0U,bool is_default=false);
 		void AddControl(shared_ptr<YYUTControl> &control);
 		void InitControl(shared_ptr<YYUTControl>& control);
+		void InitControl(shared_ptr<YYUTControl>& control,YYUTElement const & ele);
 		shared_ptr<YYUTStatic> GetStatic(int ID);
 		shared_ptr<YYUTButton> GetButton(int ID);
 		shared_ptr<YYUTControl> GetControl(int ID);
@@ -123,13 +115,13 @@ namespace YYUT
 		bool  GetControlEnable(int ID);
 		void  SetControlEnable(int ID,bool enable);
 		void  SetDefaultElemt(UINT control_type,UINT index_element,YYUTElement *element);
-		const YYUTElement *GetDefaultElement(UINT control_type,UINT index_element);
+		void  SetDefaultElemt(string element_id, const YYUTElement &element);
 		void SendEvent(UINT event,bool trigger_by_user,shared_ptr<YYUTControl> control);
 		void RequestFocus(shared_ptr<YYUTControl> &control);
 		void DrawRect(RECT *rect,D3DCOLOR color);
 		void DrawPolyLine(PINT * points,UINT number,D3DCOLOR color);
-		void DrawSprite(shared_ptr<YYUTElement> &elemet,RECT* prc_dest);
-		void DrawText(wstring text,shared_ptr<YYUTElement>& element,RECT &prc_dest,bool shadow =false,int count=-1);
+		void DrawSprite(YYUTElement &elemet,RECT* prc_dest);
+		void DrawText(wstring text, YYUTElement & element,RECT &prc_dest,bool shadow =false,int count=-1);
 		void CalcTextRect(wstring text,shared_ptr<YYUTElement> element,RECT *prc_dest,bool shadow=false,int count=-1);
 		bool GetVisible() { return visible_;}
 		void SetVisible(bool visible) {visible_=visible;}
@@ -154,6 +146,7 @@ namespace YYUT
 		void EnableKeyBoardInput(bool enable){keyboard_input_=enable;}
 		void EnableMouseInput(bool enable) {mouse_input_=enable;}
 		bool IsKeyboardInputEnable() const {return keyboard_input_;}
+		std::map<string,YYUTElement>& GetElemMap() { return element_map_;}
 		bool non_user_events_;
 		bool keyboard_input_;
 		bool mouse_input_;
@@ -161,7 +154,6 @@ namespace YYUT
 		void OnRender(float elapsed_time);
 		void SetFont(string name_id,wstring face_name,long height,long weight);
 		void SetTexture(string  name_id,wstring file_name);
-		void SetTexture(string  name_id,wstring file_name,int source_id,HMODULE resource_module);
 		shared_ptr<YYUTTextureNode> GetTexture(string index);
 		shared_ptr<YYUTFontNode> GetFont(string index);
 		YYUTDialogResourceManager* GetManager(){ return manager_;}
@@ -206,7 +198,7 @@ namespace YYUT
 		vector<shared_ptr<YYUTControl>> controls_;	
 		std::map<string,shared_ptr<YYUTFontNode>> font_map_;
 		std::map<string,shared_ptr<YYUTTextureNode>> texture_map_;
-		std::unordered_set<YYUTElementHolder> element_holder_map;
+		std::map<string,YYUTElement> element_map_;
 		HWND hwnd_;
 	};
 	class YYUTDialogResourceManager:boost::noncopyable
@@ -225,17 +217,12 @@ namespace YYUT
 		//std::shared_ptr<YYUTTextureNode> GetTextureNode(int index) const{ return vec_texture_.at(index);}
 		shared_ptr<YYUTFontNode> AddFont(wstring face_name,long height,long weight);
 		shared_ptr<YYUTTextureNode> AddTexture(wstring file_name);
-		shared_ptr<YYUTTextureNode> AddTexture(wstring file_name,int sourec_id,HMODULE module);
-		void RegisterDialog(shared_ptr<YYUTDialog>& dialog);
-		void UnRegisterDiaglog(shared_ptr<YYUTDialog>& dialog);
 		void EnableKeyboardInputForAllDialogs();
 	public:
 		CComPtr<IDirect3DStateBlock9> state_block_;
-		//IDirect3DStateBlock9* state_block_;
 		CComPtr<ID3DXSprite> sprite_;
 		unsigned int back_buffer_width_;
 		unsigned int back_buffer_height_;
-		set<std::shared_ptr<YYUTDialog> > dialogs_;
 	protected:
 		YYUTDialogResourceManager();
 		~YYUTDialogResourceManager();
@@ -252,9 +239,7 @@ namespace YYUT
 	{
 	public:
 		typedef	std::function<void()> CONTROL_EVENT;
-		YYUTControl();
-		YYUTControl(weak_ptr<YYUTDialog> dialog);
-		
+		explicit YYUTControl(weak_ptr<YYUTDialog> dialog);
 		virtual ~YYUTControl();
 		virtual void OnInit(){};
 		virtual void Refresh();
@@ -281,8 +266,7 @@ namespace YYUT
 		void SetHotKey(UINT hotKey){hot_key_=hotKey;}
 		UINT GetHotKey(){return hot_key_;}
 		virtual void SetTextColor(D3DCOLOR color);
-		shared_ptr<YYUTElement> GetElemet(UINT i){return elements_.at(i);}
-		void SetElement(UINT index,const YYUTElement * element);
+		YYUTElement GetElemet(string ele_id);
 		bool visible_;
 		bool mouse_over_;
 		bool has_focus_;
@@ -293,8 +277,6 @@ namespace YYUT
 		int height_;
 		weak_ptr<YYUTDialog> dialog_;
 		UINT index_;
-		//vector<shared_ptr<YYUTElement>> elements_;
-		map<UINT,shared_ptr<YYUTElement>> elements_;
 		void SetEvent( CONTROL_EVENT );
 	protected:
 		CONTROL_EVENT control_event_;
@@ -347,12 +329,5 @@ namespace YYUT
 		bool pressed_;
 	};
 }
-namespace std
-{
-	template<>
-	size_t std::hash<YYUT::YYUTElementHolder>::operator()(const YYUT::YYUTElementHolder & p) const
-	{
-		return std::hash<int>()(p.control_type_+p.element_index_+(UINT)p.element_.index_font_.length());
-	}
-}
+
 #endif

@@ -15,6 +15,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/exception/detail/error_info_impl.hpp>
 #include <string>
+//C语言接口用法，C++用unique_ptr
 #ifndef SAFE_DELETE
 #define SAFE_DELETE(p)       { if (p) { delete (p);     (p)=NULL; } }
 #endif    
@@ -32,13 +33,13 @@
 #define  SETP_ACCESSOR(x,y) inline void Set##y(x * t) {YYUTLock l; y=*t;};
 #define  GETP_ACCESSOR(x,y) inline x* Get##y() {YYUTLock l; return &y;};
 #define  GETP_SETP_ACCESSOR(x,y) SETP_ACCESSOR(x,y) GETP_ACCESSOR(x,y)
-#ifdef   _DEBUG
+#if defined( DEBUG ) || defined( _DEBUG )
 #define  TRACE_FUNCTION  printf("call %s \n",__FUNCTION__); 
 #else
 #define  TRACE_FUNCTION  
 #endif
 
-#ifdef _DEBUG
+#if defined( DEBUG ) || defined( _DEBUG )
 #define TRACE_EXCEPTION(e)  e<<boost::throw_function(__FUNCTION__)<<boost::throw_file(__FILE__)\
 							<<boost::throw_line(__LINE__);
 #else

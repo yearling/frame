@@ -93,9 +93,9 @@ namespace YYUT
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
 			D3DXMATRIX world,view,proj;
+			world=*camera_.GetWorldMatrix();
 			view=*camera_.GetViewMatrix();
 			proj=*camera_.GetProjMatrix();
-			D3DXMatrixIdentity(&world);
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
 			GetD3D9Device()->SetTransform(D3DTS_VIEW,&view);
 			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&proj);
@@ -146,10 +146,9 @@ namespace YYUT
 	{
 		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
 		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
-		YYUTD3D9DeviceSettings *dev_seting=GetCurrentDeviceSettings();
-		int width=dev_seting->pp.BackBufferWidth;
-		hud_->SetLocation(width-170,0);
-		hud_->SetSize(170,170);
+		int width=GetWidth();
+		hud_->SetLocation(width-500,0);
+		hud_->SetSize(500,500);
 	}
 
 	void YYGame::HUDInit()
@@ -157,10 +156,10 @@ namespace YYUT
 		hud_=YYUTDialog::MakeDialog();
 		hud_->Init(YYUTDialogResourceManager::GetInstance(),true);
 		int index_y=10;
-		shared_ptr<YYUTButton> bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",35,index_y,125,22);
+		shared_ptr<YYUTButton> bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",0,index_y,300,300);
 		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
-		hud_->AddButton(IDC_TOGGLEREF,L"Toggle REF(F3)",35,index_y+=24,125,22);
-		hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",35,index_y+=24,125,22,VK_F2);
+		hud_->AddButton(IDC_TOGGLEREF,L"Toggle REF(F3)",0,index_y+=350,200,200);
+		//hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",35,index_y+=24,125,22,VK_F2);
 	}
 
 

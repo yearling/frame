@@ -466,7 +466,7 @@ void YYUT::YYUTManager::Initial()
 	try
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
-#ifdef _DEBUG
+#if defined( DEBUG ) || defined( _DEBUG )
 		YYUT::YYSetConsoleA();		
 #endif // _DEBUG
 		SetHInstance(main_instance);
@@ -1117,6 +1117,18 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	SetDeviceObjectsReset( true );
 }
 
+ int YYUT::YYUTManager::GetWidth() 
+{
+	YYUTD3D9DeviceSettings *p=GetCurrentDeviceSettings();
+	return p->pp.BackBufferWidth;
+}
+
+ int YYUT::YYUTManager::GetHeight() 
+ {
+	YYUTD3D9DeviceSettings *p=GetCurrentDeviceSettings();
+	return p->pp.BackBufferHeight;
+ }
+
 void YYUTManager::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
 {
 
@@ -1143,7 +1155,7 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 			device_setting.behavior_flags=D3DCREATE_HARDWARE_VERTEXPROCESSING;
 			if(FindVaildDeviceSettings(&device_setting))
 			{
-#ifdef _DEBUG
+#if defined( DEBUG ) || defined( _DEBUG )
 				wcout<<"find property device settings"<<endl;
 #endif
 			}

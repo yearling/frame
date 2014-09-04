@@ -97,6 +97,8 @@ namespace YYUT
 				void		ShutDown();
 		inline  bool		IsRenderPaused();
 				void		ToggleFullScreen();
+				int         GetWidth();
+				int			GetHeight();
 	protected:
 		virtual HRESULT		MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 		virtual HRESULT		PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process);
@@ -188,6 +190,8 @@ namespace YYUT
 		bool						DeviceLost;                 // if true, then the device is lost and needs to be reset
 		bool						DeviceObjectsCreated;
 		bool						DeviceObjectsReset;
+		int							width_;
+		int							height_;
 	};
 }
 #endif
