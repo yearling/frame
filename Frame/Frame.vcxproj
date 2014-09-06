@@ -171,7 +171,6 @@
     <ClCompile Include="..\YYUT\YYUTGUI.cpp" />
     <ClCompile Include="..\YYUT\YYUTMangager.cpp" />
     <ClCompile Include="..\YYUT\YYUTObject.cpp" />
-    <ClCompile Include="..\YYUT\YYUTres.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
     <ClCompile Include="MainApp.cpp" />
@@ -186,7 +185,6 @@
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
     <ClInclude Include="..\YYUT\YYUTObject.h" />
-    <ClInclude Include="..\YYUT\YYUTres.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
     <ClInclude Include="YYGame.h" />
