@@ -17,7 +17,7 @@ namespace YYUT
 	public:
 		GET_SET_ACCESSOR(IDirect3D9*,D3D9);
 		GET_SET_ACCESSOR(IDirect3DDevice9*,D3D9Device);
-		GET_SET_ACCESSOR(YYUTD3D9DeviceSettings*,CurrentDeviceSettings);
+		
 		GETP_SETP_ACCESSOR(D3DSURFACE_DESC,BackBufferSurfaceDes9);
 		GETP_SETP_ACCESSOR(D3DCAPS9,Caps);
 		GET_SET_ACCESSOR(HWND,HWNDFocus);
@@ -72,7 +72,17 @@ namespace YYUT
 		GET_ACCESSOR(WCHAR*,FPSStats);
 		GET_ACCESSOR(WCHAR*,FrameStats);
 		GET_ACCESSOR(WCHAR*,DeviceStats);
-
+		const YYUTD3D9DeviceSettings *GetCurrentDeviceSettings()
+		{
+			YYUTLock l;
+			 return &CurrentDeviceSettings_;
+		}
+		void SetCurrentDeviceSettings(YYUTD3D9DeviceSettings* setting) 
+		{
+			YYUTLock l;
+			if(setting)
+			CurrentDeviceSettings_=*setting;	
+		}
 	public:
 		virtual void		Initial();
 		virtual void		Exit();
@@ -80,7 +90,7 @@ namespace YYUT
 		virtual HRESULT		OnCreateDevice( IDirect3DDevice9* pd3dDevice, 
 							const D3DSURFACE_DESC* pBackBufferSurfaceDesc,
 							void* pUserContext );
-		virtual HRESULT		OnResetDevice( void* pUserContext );
+		virtual bool		OnResetDevice( void* pUserContext );
 		virtual void		OnFrameMove( double fTime, float fElapsedTime);
 		virtual void		OnFrameRender(double fTime, float fElapsedTime);
 		virtual void		OnLostDevice( void* pUserContext );
@@ -100,7 +110,7 @@ namespace YYUT
 				int         GetWidth();
 				int			GetHeight();
 	protected:
-		virtual HRESULT		MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+		virtual LRESULT		MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) throw();
 		virtual HRESULT		PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process);
 		virtual void		KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown);
 		virtual void		MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, 
@@ -110,8 +120,7 @@ namespace YYUT
 		inline  HWND		GetHWND();
 		inline  bool		IsWindowed();
 				void		WindowSizeChange();	
-				void		ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate, 
-								bool clip_window_to_single_adpater);
+				HRESULT		ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate);
 				bool		CanDeviceBeReset(YYUTD3D9DeviceSettings *old_device_settings,
 								YYUTD3D9DeviceSettings *new_device_settings);
 
@@ -120,7 +129,7 @@ namespace YYUT
 				void		SetD3D9DeviceCursor( HCURSOR hCursor, bool bpush_backWatermark );
 				void		Cleanup3DEnvironment9(bool release_setting);
 				void		Create3DEnvironment9();
-				void		Reset3DEnvironment();
+				HRESULT		Reset3DEnvironment();
 				bool		FindVaildDeviceSettings(YYUTD3D9DeviceSettings* dev_set);
 	private:
 		class YYUTLock
@@ -135,7 +144,7 @@ namespace YYUT
 	private:
 		IDirect3D9*					D3D9;
 		IDirect3DDevice9*			D3D9Device;
-		YYUTD3D9DeviceSettings*		CurrentDeviceSettings;
+		YYUTD3D9DeviceSettings		CurrentDeviceSettings_;
 		D3DSURFACE_DESC				BackBufferSurfaceDes9;
 		D3DCAPS9					Caps;
 		HWND						HWNDFocus;
@@ -192,6 +201,7 @@ namespace YYUT
 		bool						DeviceObjectsReset;
 		int							width_;
 		int							height_;
+		bool                        not_first_time;
 	};
 }
 #endif

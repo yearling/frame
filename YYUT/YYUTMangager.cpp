@@ -11,8 +11,14 @@
 #include <boost/exception/all.hpp>
 using namespace YYUT;
 
-LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) throw()
 {
+	try{
+	if(uMsg==WM_MOUSEMOVE)
+	{
+		short x=LOWORD(lParam);
+		short y=HIWORD(lParam);
+	}
 	// Consolidate the keyboard messages and pass them to the app's keyboard callback
 	if( uMsg == WM_KEYDOWN ||
 		uMsg == WM_SYSKEYDOWN ||
@@ -93,7 +99,7 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				HRESULT hr;
 				double fTime = YYUTTimer::GetInstance().GetTime();
-				float fElapsedTime = YYUTTimer::GetInstance().GetElapseTime();						
+				float fElapsedTime = YYUTTimer::GetInstance().GetElapseTime();	
 				OnFrameRender(  fTime, fElapsedTime );
 				hr = D3D9Device->Present( NULL, NULL, NULL, NULL );
 				if( D3DERR_DEVICELOST == hr )
@@ -219,61 +225,6 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				return true; // prevent Windows from setting cursor to window class cursor
 		}
 		break;
-
-		//case WM_ACTIVATEAPP:
-		//	if( wParam == TRUE && !DXUTIsActive() ) // Handle only if previously not active 
-		//	{
-		//		GetDXUTState().SetActive( true );
-
-		//		// Enable controller rumble & input when activating app
-		//		DXUTEnableXInput( true );
-
-		//		// The GetMinimizedWhileFullscreen() varible is used instead of !DXUTIsWindowed()
-		//		// to handle the rare case toggling to windowed mode while the fullscreen application 
-		//		// is minimized and thus making the pause count wrong
-		//		if( GetDXUTState().GetMinimizedWhileFullscreen() )
-		//		{
-		//			if( DXUTIsD3D9( GetDXUTState().GetCurrentDeviceSettings() ) )
-		//				DXUTPause( false, false ); // Unpause since we're no longer minimized
-		//			GetDXUTState().SetMinimizedWhileFullscreen( false );
-
-		//			if( DXUTIsAppRenderingWithD3D10() )
-		//			{
-		//				DXUTToggleFullScreen();
-		//			}
-		//		}
-
-		//		// Upon returning to this app, potentially disable shortcut keys 
-		//		// (Windows key, accessibility shortcuts) 
-		//		DXUTAllowShortcutKeys( ( DXUTIsWindowed() ) ? GetDXUTState().GetAllowShortcutKeysWhenWindowed() :
-		//			GetDXUTState().GetAllowShortcutKeysWhenFullscreen() );
-
-		//	}
-		//	else if( wParam == FALSE && DXUTIsActive() ) // Handle only if previously active 
-		//	{
-		//		GetDXUTState().SetActive( false );
-
-		//		// Disable any controller rumble & input when de-activating app
-		//		DXUTEnableXInput( false );
-
-		//		if( !DXUTIsWindowed() )
-		//		{
-		//			// Going from full screen to a minimized state 
-		//			ClipCursor( NULL );      // don't limit the cursor anymore
-		//			if( DXUTIsD3D9( GetDXUTState().GetCurrentDeviceSettings() ) )
-		//				DXUTPause( true, true ); // Pause while we're minimized (take care not to pause twice by handling this message twice)
-		//			GetDXUTState().SetMinimizedWhileFullscreen( true );
-		//		}
-
-		//		// Restore shortcut keys (Windows key, accessibility shortcuts) to original state
-		//		//
-		//		// This is important to call here if the shortcuts are disabled, 
-		//		// because if this is not done then the Windows key will continue to 
-		//		// be disabled while this app is running which is very bad.
-		//		// If the app crashes, the Windows key will return to normal.
-		//		DXUTAllowShortcutKeys( true );
-		//	}
-		//	break;
 
 	case WM_ENTERMENULOOP:
 		// Pause the app when menus are displayed
@@ -413,7 +364,15 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	// by not passing these messages to the DefWindowProc only when
 	// there's no menu present
 	return DefWindowProc( hWnd, uMsg, wParam, lParam );
+	}
+	catch(...)
+	{
+		std::cout<<"ERROR happend in 窗口函数TAT"<<endl;
+		std::cout<<boost::current_exception_diagnostic_information();
+		return DefWindowProc( hWnd, uMsg, wParam, lParam );
+	}
 }
+
 
 void YYUTManager::GameExit()
 {
@@ -461,8 +420,8 @@ void YYUT::YYUTManager::Initial()
 		FreeLibrary( hUser32 );
 	}
 	YYUTTimer::GetInstance().Reset();
-	int default_x=1920;
-	int default_y=1080;
+	int default_x=800;
+	int default_y=600;
 	try
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
@@ -495,15 +454,18 @@ YYUTManager::YYUTManager()
 {
 	D3D9=NULL;
 	D3D9Device=NULL;
-	CurrentDeviceSettings=NULL;
 	ZeroMemory(&BackBufferSurfaceDes9,sizeof(BackBufferSurfaceDes9));
 	ZeroMemory(&Caps,sizeof(Caps));
+	CurrentDeviceSettings_.pp.Windowed=TRUE;
 	HWNDFocus=NULL;
 	HWNDDeviceFullScreen=NULL;
 	HWNDDeviceWindowed=NULL;
 	AdapterMonitor=NULL;
 	AutoChangeAdapter=true;
 	AllowShortcutKeys=true;
+	SetIgnoreSizeChange(true);
+	memset(&CurrentDeviceSettings_,0,sizeof(CurrentDeviceSettings_));
+	not_first_time=false;
 }
 
 YYUTManager::~YYUTManager()
@@ -522,10 +484,10 @@ HRESULT YYUTManager::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFA
 	return S_OK;
 }
 
-HRESULT YYUTManager::OnResetDevice(void* pUserContext)
+bool YYUTManager::OnResetDevice(void* pUserContext)
 {
 	GameResourceReset();
-	return S_OK;
+	return true;
 }
 
 void YYUTManager::OnFrameMove(double fTime, float fElapsedTime)
@@ -563,10 +525,10 @@ bool YYUTManager::IsRenderPaused()
 	return GetPauseRenderingCount()>0;
 }
 
-void YYUTManager::Pause(bool _time,bool _render)
+void YYUTManager::Pause(bool time_stop,bool render_stop)
 {
 	int pause_time_count=GetPauseTimeCount();
-	if(_time)
+	if(time_stop)
 		pause_time_count++;
 	else
 		pause_time_count--;
@@ -574,7 +536,7 @@ void YYUTManager::Pause(bool _time,bool _render)
 		pause_time_count=0;
 	SetPauseTimeCount(pause_time_count);
 	int pause_render_count=GetPauseRenderingCount();
-	if(_render)
+	if(render_stop)
 		pause_render_count++;
 	else
 		pause_render_count--;
@@ -603,49 +565,41 @@ void YYUTManager::WindowSizeChange()
 {
 	if(GetIgnoreSizeChange())
 		return;
-	YYUTD3D9DeviceSettings* deviceSettings = GetCurrentDeviceSettings();
-	YYUTD3D9DeviceSettings ds;
-	memset(&ds,0,sizeof(YYUTD3D9DeviceSettings));
-	if(!deviceSettings)
-		memcpy((void*)&ds,deviceSettings,sizeof(YYUTD3D9DeviceSettings));
-	deviceSettings=&ds;
-
+	YYUTD3D9DeviceSettings ds=*GetCurrentDeviceSettings();
 	RECT rcCurrentClient;
 	GetClientRect( GetHWND(), &rcCurrentClient );
 
-	if( ( UINT )rcCurrentClient.right != deviceSettings->pp.BackBufferWidth ||
-		( UINT )rcCurrentClient.bottom != deviceSettings->pp.BackBufferHeight)
+	if( ( UINT )rcCurrentClient.right != ds.pp.BackBufferWidth ||
+		( UINT )rcCurrentClient.bottom != ds.pp.BackBufferHeight)
 	{
 		// A new window size will require a new backbuffer size size
 		// Tell DXUTChangeDevice and D3D to size according to the HWND's client rect
-		deviceSettings->pp.BackBufferWidth = 0;
-		deviceSettings->pp.BackBufferHeight = 0;
-		ChangeDevice( deviceSettings,false, false );
+		ds.pp.BackBufferWidth = 0;
+		ds.pp.BackBufferHeight = 0;
+		try
+		{ChangeDevice( &ds,false);}
+		catch(YYUTException &)
+		{
+			cout<<"in change size catched!"<<endl;
+			throw;
+		}
 	}
-
 }
 
-void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate, bool clip_window_to_single_adpater)
+HRESULT YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings, bool force_recreate)
 {
 #if (defined _DEBUG) || (defined DEBUG )
 	cout<<"call ChangeDevice\n"<<endl;
 #endif
-	YYUTD3D9DeviceSettings *old_d3ddevice_setting=GetCurrentDeviceSettings();
+	HRESULT hr;
+	YYUTD3D9DeviceSettings old_d3ddevice_setting=*GetCurrentDeviceSettings();
 	assert(new_device_Settings);
 	if(!new_device_Settings)
 		BOOST_THROW_EXCEPTION(boost::enable_error_info(std::invalid_argument("invalid new_device_settings")));	
-	//Make a copy of the new_device_setting on the heap
-	//对new_device_Settings的东西做一下备份。然后还指向它
-	YYUTD3D9DeviceSettings* new_device_settings_on_heap=new YYUTD3D9DeviceSettings;
-	if(new_device_settings_on_heap==NULL)
-		BOOST_THROW_EXCEPTION(boost::enable_error_info(std::bad_alloc("Change device bad_alloc")));
-	memcpy(new_device_settings_on_heap,new_device_Settings,sizeof(YYUTD3D9DeviceSettings));
-	new_device_Settings=new_device_settings_on_heap;
+
 	if(!this->ModifyDeviceSettings(new_device_Settings))
 	{
-		delete new_device_Settings;
-		new_device_Settings=NULL;
-		return;
+		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_str("modify device settings failed!"));
 	}
 	SetCurrentDeviceSettings(new_device_Settings);
 	Pause(true,true);
@@ -655,11 +609,11 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 		keep_current_window_size=true;
 	if(new_device_Settings->pp.Windowed)//window mode
 	{
-		if(old_d3ddevice_setting &&!old_d3ddevice_setting->pp.Windowed)
+		if(not_first_time &&!old_d3ddevice_setting.pp.Windowed)
 		{
 			//from fullscreen -> windowed
-			SetFullScreenBackBufferWidthAtModeChange(old_d3ddevice_setting->pp.BackBufferWidth);
-			SetFULLScreenBackBufferHeightAtModeChage(old_d3ddevice_setting->pp.BackBufferHeight);
+			SetFullScreenBackBufferWidthAtModeChange(old_d3ddevice_setting.pp.BackBufferWidth);
+			SetFULLScreenBackBufferHeightAtModeChage(old_d3ddevice_setting.pp.BackBufferHeight);
 			SetWindowLong(GetHWNDDeviceWindowed(),GWL_STYLE,GetWindowedStyleAtModeChange());
 		}
 		// If different device windows are used for windowed mode and fullscreen mode,
@@ -670,7 +624,7 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 	else
 	{
 		//from windowed to fullscreen
-		if(old_d3ddevice_setting==NULL || (old_d3ddevice_setting && old_d3ddevice_setting->pp.Windowed))
+		if(!not_first_time ||old_d3ddevice_setting.pp.Windowed)
 		{
 			WINDOWPLACEMENT *pwp=GetWindowedPlacement();
 			ZeroMemory(pwp,sizeof(WINDOWPLACEMENT));
@@ -681,10 +635,10 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 			DWORD style=GetWindowLong(GetHWNDDeviceWindowed(),GWL_STYLE);
 			style &= ~WS_MAXIMIZE & ~WS_MINIMIZE;
 			SetWindowedStyleAtModeChange(style);
-			if(old_d3ddevice_setting)
+			if(not_first_time)
 			{
-				SetWindowBackBufferWidthAtModeChange(old_d3ddevice_setting->pp.BackBufferWidth);
-				SetWindowBackBufferHeightAtModeChange(old_d3ddevice_setting->pp.BackBufferHeight);
+				SetWindowBackBufferWidthAtModeChange(old_d3ddevice_setting.pp.BackBufferWidth);
+				SetWindowBackBufferHeightAtModeChange(old_d3ddevice_setting.pp.BackBufferHeight);
 			}
 		}
 		//Hide the window to avoid animation of blank windows
@@ -704,59 +658,45 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 			SetWindowPlacement(GetHWNDDeviceFullScreen(),&full_screen_wp);
 		}
 	}
-	if(!force_recreate &&CanDeviceBeReset(old_d3ddevice_setting,new_device_Settings))
+	if(!force_recreate &&CanDeviceBeReset(&old_d3ddevice_setting,new_device_Settings))
 	{
-		try
+		hr=Reset3DEnvironment();
+		if(FAILED(hr))
 		{
-			Reset3DEnvironment();
-		}
-		catch(YYUTManagerException & e)
-		{
-			HRESULT *hr=boost::get_error_info<err_hr>(e);
-			if(D3DERR_DEVICELOST==*hr)
+			if(D3DERR_DEVICELOST==hr)
 			{
 				SetDeviceLost(true);
 			}
 			else 
 			{
-				SetCurrentDeviceSettings(old_d3ddevice_setting);
-				try
+				SetCurrentDeviceSettings(&old_d3ddevice_setting);
+				hr=ChangeDevice(&old_d3ddevice_setting,true);
+				if(FAILED(hr))
 				{
-					ChangeDevice(old_d3ddevice_setting,true,clip_window_to_single_adpater);
-				}	
-				catch(YYUTManagerException &e)
-				{	
-					HRESULT *hr=boost::get_error_info<err_hr>(e);
-					if(FAILED(hr))
-					{
-						throw e<<err_str("can't reset all device");
-					}
-					else
-					{
-						Pause(false,false);
-					}
+					BOOST_THROW_EXCEPTION(YYUTException()<<err_str("can't changed the device to old state"));
 				}
+				else
+				{
+					Pause(false,false);
+				}
+
 			}
 		}
+		
 	}
 	else
 	{
-		try{
-		if(old_d3ddevice_setting)
+		if(not_first_time)
 			Cleanup3DEnvironment9(false);
-			Create3DEnvironment9();
-		}
-		catch(YYUTManagerException &e)
-		{
-			UNREFERENCED_PARAMETER(e);
-				delete old_d3ddevice_setting;
-				old_d3ddevice_setting=nullptr;
-				Cleanup3DEnvironment9(true);
-				Pause(false,false);
-				throw;
+		try{Create3DEnvironment9();}
+		catch(...){
+			Cleanup3DEnvironment9(true);
+			Pause(false,false);
+			SetIgnoreSizeChange(false);
+			throw;
 		}
 	}
-	if(old_d3ddevice_setting &&!old_d3ddevice_setting->pp.Windowed&&new_device_Settings->pp.Windowed)
+	if(not_first_time&&!old_d3ddevice_setting.pp.Windowed&&new_device_Settings->pp.Windowed)
 	{
 		//from fullscreen to windowed, to restore window formal size and position
 		WINDOWPLACEMENT *wp=GetWindowedPlacement();
@@ -766,9 +706,13 @@ void YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Settings
 	}
 	if(!IsWindowVisible(GetHWND()))
 		ShowWindow(GetHWND(),SW_SHOW);
-	delete	old_d3ddevice_setting;
 	Pause(false,false);
+	SetIgnoreSizeChange(false);
+	not_first_time=true;
+	return S_OK	;
 }
+
+
 
 bool YYUTManager::CanDeviceBeReset(YYUTD3D9DeviceSettings *old_device_settings,YYUTD3D9DeviceSettings *new_device_settings)
 {
@@ -787,7 +731,7 @@ bool YYUTManager::CanDeviceBeReset(YYUTD3D9DeviceSettings *old_device_settings,Y
 //		3Stores the back buffer description
 //		Sets up the full screen Direct3D cursor if requested
 //		calls the device reset
-void YYUTManager::Reset3DEnvironment()
+HRESULT YYUTManager::Reset3DEnvironment()
 {
 	TRACE_FUNCTION
 	HRESULT hr;
@@ -799,22 +743,26 @@ void YYUTManager::Reset3DEnvironment()
 		SetDeviceObjectsReset(false);
 	}
 	//Reset the device
-	YYUTD3D9DeviceSettings *device_setting=GetCurrentDeviceSettings();
-	assert(device_setting);
-	hr=d3d_device->Reset(&device_setting->pp);
+	YYUTD3D9DeviceSettings device_setting=*GetCurrentDeviceSettings();
+	hr=d3d_device->Reset(&device_setting.pp);
 	if(FAILED(hr))
 	{
-		 BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_hr(hr));
+		if(hr==D3DERR_DEVICELOST)
+			return D3DERR_DEVICELOST;
+		else
+			BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_hr(hr)<<err_str("Try to reset device failed!"));
 	}
+	SetCurrentDeviceSettings(&device_setting);
 	UpdateBackBufferDes();
+	SetCurrentDeviceSettings(&device_setting);
 	SetupCursor();
-	hr=OnResetDevice(NULL);
-	if(FAILED(hr))
+	if(!OnResetDevice(NULL))
 	{
 		OnLostDevice(NULL);
-		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_hr(hr));
+		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_str("try to reset user defined reset function failed!"));
 	}
 	SetDeviceObjectsReset(true);
+	return S_OK;
 }
 
 void YYUTManager::UpdateBackBufferDes()
@@ -827,6 +775,7 @@ void YYUTManager::UpdateBackBufferDes()
 	if(SUCCEEDED(hr))
 	{
 		back_buffer->GetDesc(buffer_surface_des);
+		
 		back_buffer->Release();
 	}
 }
@@ -1065,16 +1014,15 @@ void YYUTManager::Cleanup3DEnvironment9(bool release_setting)
 	SetD3D9Device(nullptr);
 	if(release_setting)
 	{
-		YYUTD3D9DeviceSettings * old_device_settings=GetCurrentDeviceSettings();
-		delete old_device_settings;
-		old_device_settings=nullptr;
 		SetCurrentDeviceSettings(nullptr);
+		
 	}
 	D3DSURFACE_DESC * back_buffer_surface_des=GetBackBufferSurfaceDes9();
 	ZeroMemory(back_buffer_surface_des,sizeof(D3DSURFACE_DESC));
 	D3DCAPS9 *d3dCaps=GetCaps();
 	ZeroMemory(d3dCaps,sizeof(D3DCAPS9));
 	SetDeviceObjectsCreated(false);
+	not_first_time=false;
 }
 
 void YYUT::YYUTManager::Create3DEnvironment9()
@@ -1082,14 +1030,13 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	TRACE_FUNCTION
 	HRESULT hr=S_OK;
 	IDirect3DDevice9 *d3d_device=GetD3D9Device();
-	YYUTD3D9DeviceSettings *new_device_setting=GetCurrentDeviceSettings();
-	assert(new_device_setting);
+	YYUTD3D9DeviceSettings new_device_setting=*GetCurrentDeviceSettings();
 	if(d3d_device==nullptr)
 	{
 		IDirect3D9 * d3d=GetD3D9();
 		assert(d3d);
-		hr=d3d->CreateDevice(new_device_setting->adapter_ordinal,new_device_setting->device_type,GetHWNDFocus(),new_device_setting->behavior_flags,
-			&new_device_setting->pp,&d3d_device);
+		hr=d3d->CreateDevice(new_device_setting.adapter_ordinal,new_device_setting.device_type,GetHWNDFocus(),new_device_setting.behavior_flags,
+			&new_device_setting.pp,&d3d_device);
 		if(hr==D3DERR_DEVICELOST)
 		{
 			SetDeviceLost(true);
@@ -1104,10 +1051,6 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 		d3d_device->AddRef();	
 	}
 	SetD3D9Device(d3d_device);
-	if(new_device_setting->device_type==D3DDEVTYPE_REF && GetExitCode()==0)
-		SetExitCode(10);
-	if(new_device_setting->device_type==D3DDEVTYPE_HAL && GetExitCode()==10)
-		SetExitCode(0);
 	UpdateBackBufferDes();
 	SetupCursor();
 	D3DCAPS9 *d3d_caps=GetCaps();
@@ -1115,18 +1058,17 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	GameResourceInit();
 	OnResetDevice(nullptr);
 	SetDeviceObjectsReset( true );
+	SetDeviceObjectsCreated( true );
 }
 
  int YYUT::YYUTManager::GetWidth() 
 {
-	YYUTD3D9DeviceSettings *p=GetCurrentDeviceSettings();
-	return p->pp.BackBufferWidth;
+	return GetCurrentDeviceSettings()->pp.BackBufferWidth;
 }
 
  int YYUT::YYUTManager::GetHeight() 
  {
-	YYUTD3D9DeviceSettings *p=GetCurrentDeviceSettings();
-	return p->pp.BackBufferHeight;
+	return GetCurrentDeviceSettings()->pp.BackBufferHeight;
  }
 
 void YYUTManager::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
@@ -1161,7 +1103,7 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 			}
 			else
 				throw YYUTManagerException()<<err_str("can't find property device settings");
-			ChangeDevice(&device_setting,false,true);
+			ChangeDevice(&device_setting,false);
 	}
 	catch(YYUTException &e)
 	{
@@ -1205,8 +1147,8 @@ void YYUTManager::Render3DEnvironment()
 	{
 		if(GetDeviceLost())
 		{
-			YYUTD3D9DeviceSettings *dev_set=GetCurrentDeviceSettings();
-			ChangeDevice(dev_set,false,true);
+			YYUTD3D9DeviceSettings dev_set=*GetCurrentDeviceSettings();
+			ChangeDevice(&dev_set,false);
 		}
 		return;
 	}
@@ -1303,12 +1245,12 @@ void YYUTManager::ToggleFullScreen()
 	{
 		try
 		{
-			ChangeDevice(&dev_setting,false,false);
+			ChangeDevice(&dev_setting,false);
 		}
 		catch(YYUTManagerException &e)
 		{
 			UNREFERENCED_PARAMETER(e);
-			ChangeDevice(&old_device_settings,false,false);
+			ChangeDevice(&old_device_settings,false);
 		}
 	}
 }

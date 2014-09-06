@@ -120,22 +120,16 @@ namespace YYUT
 		void RequestFocus(shared_ptr<YYUTControl> &control);
 		void DrawRect(RECT *rect,D3DCOLOR color);
 		void DrawPolyLine(PINT * points,UINT number,D3DCOLOR color);
-		void DrawSprite(YYUTElement &elemet,RECT* prc_dest);
+		void DrawSprite(YYUTElement &elemet,RECT &prc_dest);
 		void DrawText(wstring text, YYUTElement & element,RECT &prc_dest,bool shadow =false,int count=-1);
 		void CalcTextRect(wstring text,shared_ptr<YYUTElement> element,RECT *prc_dest,bool shadow=false,int count=-1);
 		bool GetVisible() { return visible_;}
 		void SetVisible(bool visible) {visible_=visible;}
-		bool GetMinimized() {return minimized_;}
-		void SetMinimized(bool minimized) {minimized_=minimized;}
 		void SetBackgroundColor(D3DCOLOR color_all_corners)
 		{
 			SetBackgroundColor(color_all_corners,color_all_corners,color_all_corners,color_all_corners);
 		}
 		void SetBackgroundColor(D3DCOLOR top_left,D3DCOLOR top_right,D3DCOLOR bottom_left,D3DCOLOR bottom_right);
-		void EnableCaption(bool enable) {caption_enable_=enable;}
-		int GetCaptionHeight() const {return caption_height_;}
-		void SetCaptionHeight(int height){ height_=height;}
-		void SetCaptionText(wstring text){ caption_text_=text;}
 		void GetLocation(POINT &pt) const { pt.x=x_;pt.y=y_;}
 		void SetLocation(int x,int y) {x_=x;y_=y;}
 		void SetSize(int width,int height){width_=width;height_=height;}
@@ -143,13 +137,8 @@ namespace YYUT
 		void RemoveControl(int ID);
 		void RemoveAllControl();
 		void EnableNonUserEvents(bool enable){non_user_events_=enable; }
-		void EnableKeyBoardInput(bool enable){keyboard_input_=enable;}
-		void EnableMouseInput(bool enable) {mouse_input_=enable;}
-		bool IsKeyboardInputEnable() const {return keyboard_input_;}
 		std::map<string,YYUTElement>& GetElemMap() { return element_map_;}
 		bool non_user_events_;
-		bool keyboard_input_;
-		bool mouse_input_;
 		void Refresh();
 		void OnRender(float elapsed_time);
 		void SetFont(string name_id,wstring face_name,long height,long weight);
@@ -177,23 +166,17 @@ namespace YYUT
 		void OnMOuseUp(POINT pt);
 		bool OnCycleFocus(bool forward);
 		static shared_ptr<YYUTControl> control_focus_;
-		static shared_ptr<YYUTControl> control_pressed_;
 		shared_ptr<YYUTControl>		control_mouse_over_;
 		bool visible_;
-		bool caption_enable_;
-		bool minimized_;
-		bool drag_;
-		wstring caption_text_;
+		bool be_pressed_;
 		int x_;
 		int y_;
 		int width_;
 		int height_;
-		int caption_height_;
 		D3DCOLOR color_top_left_;
 		D3DCOLOR color_top_right_;
 		D3DCOLOR color_bottom_left_;
 		D3DCOLOR color_bottom_right_;
-		shared_ptr<YYUTElement> cap_element_;
 		YYUTDialogResourceManager *manager_;
 		vector<shared_ptr<YYUTControl>> controls_;	
 		std::map<string,shared_ptr<YYUTFontNode>> font_map_;
@@ -263,6 +246,14 @@ namespace YYUT
 		void SetID(int id){ID_=id;}
 		void SetLocation(int x,int y){x_=x;y_=y;UpdateRect();}
 		void SetSize(int width,int height){width_=width;height_=height;UpdateRect();}
+		void ResetPosisionSize(int x,int y,int width,int height)
+		{
+			x_=x;
+			y_=y;
+			width_=width;
+			height_=height;
+			UpdateRect();
+		}
 		void SetHotKey(UINT hotKey){hot_key_=hotKey;}
 		UINT GetHotKey(){return hot_key_;}
 		virtual void SetTextColor(D3DCOLOR color);
@@ -310,7 +301,6 @@ namespace YYUT
 			shared_ptr<YYUTDialog> dialog=dialog_.lock();
 			if(dialog)
 			{
-				if(dialog->IsKeyboardInputEnable())
 				dialog->RequestFocus(shared_from_this());
 				dialog->SendEvent(EVENT_BUTTON_CLICKED,true,shared_from_this());
 			}

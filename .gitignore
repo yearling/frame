@@ -31,3 +31,5 @@ _ReSharper*/
 $tf*/
 *.sdf
 ipch/
+*.psess
+*.vsp

@@ -37,8 +37,8 @@ namespace YYUT
 		virtual int Run();
 		virtual void Exit();
 	protected:
-		static LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
-		virtual LRESULT MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK WndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam ) ;
+		virtual LRESULT MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) throw();
 	private:
 		void * operator new(size_t){};
 		void * operator new[](size_t){};

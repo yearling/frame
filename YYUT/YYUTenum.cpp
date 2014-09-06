@@ -243,7 +243,6 @@ namespace YYUT
 	{
 		d3d_=d3d;
 	}
-
 	HRESULT YYUTenum::EnumerateDevices(D3D9EnumAdapterInfo *adapter_info,set<D3DFORMAT> * adapter_foramt_set)
 	{
 		HRESULT hr;
@@ -254,7 +253,9 @@ namespace YYUT
 			D3DDEVTYPE_REF
 		};
 		const UINT dev_type_count=_countof(dev_type);
-		for(UINT i=0;i<dev_type_count;i++)
+		//for(UINT i=0;i<dev_type_count;i++)
+		//为了速度，剩下两个查询速度极慢，5s左右，现在用不着，可以不用查询
+		for(UINT i=0;i<1;i++)
 		{
 			D3D9EnumDeviceInfo *dev_info=new D3D9EnumDeviceInfo;
 			if(dev_info==nullptr)
@@ -281,7 +282,7 @@ namespace YYUT
 				pp.Windowed=true;
 				pp.hDeviceWindow=hwnd_;
 				IDirect3DDevice9 * dev=nullptr;
-				if(FAILED(hr=d3d_->CreateDevice(adapter_info->adapter_ordianl,dev_info->device_type,hwnd_,D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_FPU_PRESERVE,&pp,&dev)))
+				if(FAILED(hr=d3d_->CreateDevice(adapter_info->adapter_ordianl,dev_info->device_type,hwnd_,D3DCREATE_SOFTWARE_VERTEXPROCESSING|D3DCREATE_FPU_PRESERVE,&pp,&dev)))
 				{
 					delete dev_info;
 					continue;

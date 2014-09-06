@@ -388,9 +388,6 @@ namespace YYUT
 	{
 		RECT rc_screen=*rect;
 		OffsetRect(&rc_screen,x_,y_);
-		if(caption_enable_)
-			OffsetRect(&rc_screen,0,caption_height_);
-
 	}
 
 	void YYUTDialog::DrawPolyLine(PINT * points,UINT number,D3DCOLOR color)
@@ -405,15 +402,12 @@ namespace YYUT
 	{
 		return rc.bottom-rc.top;
 	}
-	void YYUTDialog::DrawSprite(YYUTElement &elemet,RECT* prc_dest)
-	{
-		if(elemet.texture_color_.current_.a==0)
-			return ;
+	void YYUTDialog::DrawSprite(YYUTElement &elemet,RECT &prc_dest)
+{
+		
 		RECT rc_texture=elemet.rect_texture_;
-		RECT rc_screen=*prc_dest;
+		RECT rc_screen=prc_dest;
 		OffsetRect(&rc_screen,x_,y_);
-		if(caption_enable_)
-			OffsetRect(&rc_screen,0,caption_height_);
 		shared_ptr<YYUTTextureNode> sp_text_node=GetTexture(elemet.texture_id_);
 		float scale_x=(float)RectWidth(rc_screen)/RectWidth(rc_texture);
 		float scale_y=(float)RectHeight(rc_screen)/RectHeight(rc_texture);
@@ -423,7 +417,7 @@ namespace YYUT
 		D3DXVECTOR3 pos((float)rc_screen.left,(float)rc_screen.top,0.0f);
 		pos.x/=scale_x;
 		pos.y/=scale_y;
-		manager_->sprite_->Draw(sp_text_node->texture_,&rc_texture,NULL,&pos,elemet.texture_color_.current_);
+		manager_->sprite_->Draw(sp_text_node->texture_,&rc_texture,NULL,&pos,0XFFFFFFFF);
 
 	}
 
@@ -472,8 +466,6 @@ namespace YYUT
 				last_time_refresh_=YYUTTimer::GetInstance().GetTime();
 				Refresh();
 			}
-			if(!visible_ || (minimized_ && !caption_enable_))
-				return ;
 			CComPtr<IDirect3DDevice9> d3d_device=manager_->GetD3D9Device();
 			//用来存储state_block,过会用来还原statae
 			manager_->state_block_->Capture();
@@ -499,7 +491,8 @@ namespace YYUT
 			d3d_device->SetTextureStageState(1,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
 			BOOL back_ground_is_visible=(color_top_left_ | color_top_right_ | color_bottom_left_ | 
 				color_bottom_right_) &0xff0000;
-			if(!minimized_ && back_ground_is_visible)
+			//back_ground_is_visible=true;
+			if( back_ground_is_visible)
 			{
 				YYUT_SCREEN_VERTEX_UNTEX vertices[4]=
 				{
@@ -521,8 +514,6 @@ namespace YYUT
 			d3d_device->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_TEXTURE);
 			d3d_device->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_DIFFUSE);
 			d3d_device->SetSamplerState(0,D3DSAMP_MINFILTER,D3DTEXF_LINEAR);
-			shared_ptr<YYUTTextureNode> texture_node=GetTexture("desert");
-			d3d_device->SetTexture(0,texture_node->texture_);
 			manager_->sprite_->Begin(D3DXSPRITE_DONOTSAVESTATE);
 		/*	if(caption_enable_)
 			{
@@ -533,16 +524,14 @@ namespace YYUT
 					caption_text_+=L"(Minimized)";
 				DrawText(caption_text_,cap_element_,rc,true);
 			}*/
-			if(!minimized_)
-			{
 				for_each(controls_.begin(),controls_.end(),[&](shared_ptr<YYUTControl> & sp_control)
 				{
-					if(sp_control!=control_focus_)
+					//if(sp_control!=control_focus_)
 						sp_control->Render(elapsed_time);
 				});
-				if(control_focus_&& control_focus_->dialog_.lock()==shared_from_this())
-					control_focus_->Render(elapsed_time);
-			}
+				/*if(control_focus_&& control_focus_->dialog_.lock()==shared_from_this())
+					control_focus_->Render(elapsed_time);*/
+			
 			manager_->sprite_->End();
 			manager_->state_block_->Apply();
 	}
@@ -562,7 +551,7 @@ namespace YYUT
 	{
 		assert(manager_!=nullptr && L"Try to call YYUTDialog::Init first");
 		font_map_.insert(make_pair<string,shared_ptr<YYUTFontNode>>
-			(name_id,manager_->AddFont(face_name,height,weight)))	;
+			(std::move(name_id),manager_->AddFont(face_name,height,weight)))	;
 	}
 
 	void YYUTDialog::SetTexture(string name_id,wstring file_name)
@@ -597,10 +586,7 @@ namespace YYUT
 		width_=0;
 		height_=0;
 		visible_=true;
-		caption_enable_=false;
-		minimized_=false;
-		drag_=false;
-		caption_height_=18;
+		be_pressed_=false;
 		color_top_left_=0;
 		color_top_right_=0;
 		color_bottom_left_=0;
@@ -608,10 +594,7 @@ namespace YYUT
 		last_time_refresh_=0;
 		default_control_id_=0xFFFF;
 		non_user_events_=false;
-		keyboard_input_=false;
-		mouse_input_=true;
 		manager_=nullptr;
-		cap_element_=make_shared<YYUTElement>();
 	}
 
 	void YYUTDialog::Init(YYUTDialogResourceManager *manager,bool register_dialog/*=true*/)
@@ -630,28 +613,31 @@ namespace YYUT
 	{
 		//SetFont(0);
 		SetFont("default_font",L"Arial",40,FW_NORMAL);
-		SetTexture("desert",_T("Desert.jpg"));
+		SetTexture("bt_default",_T("default.jpg"));
+		SetTexture("bt_move",_T("move.jpg"));
+		SetTexture("bt_press",_T("press.jpg"));
 		YYUTElement element;
 		RECT texture_rc;
-		 
-		//YYUTSTATIC
 		element.SetFont("default_font");
-		element.font_color_.state_[YYUT_STATE_DISABLE]=D3DCOLOR_ARGB(200,200,200,200);
+		element.font_color_.state_[YYUT_STATE_DISABLE]=D3DCOLOR_ARGB(125,255,255,255);
+		element.font_color_.state_[YYUT_STATE_NORMAL]=D3DCOLOR_ARGB(230,255,255,255);
+		element.font_color_.state_[YYUT_STATE_FOCUS]=D3DCOLOR_ARGB(230,255,255,255);
+		element.font_color_.state_[YYUT_STATE_HIDDEN]=D3DCOLOR_ARGB(120,255,255,255);
+		element.font_color_.state_[YYUT_STATE_MOUSEOVER]=D3DCOLOR_ARGB(230,255,255,255);
+		element.font_color_.state_[YYUT_STATE_PRESSED]=D3DCOLOR_ARGB(255,255,255,255);
 		//YYUTButton
-		::SetRect(&texture_rc,0,0,136,54);
-		element.SetTexture("desert",&texture_rc);
+		::SetRect(&texture_rc,0,0,256,256);
+		element.SetTexture("bt_default",&texture_rc);
 		element.SetFont("default_font");
-		element.texture_color_.state_[YYUT_STATE_NORMAL]=D3DCOLOR_ARGB(150,255,255,255);
-		element.texture_color_.state_[YYUT_STATE_PRESSED]=D3DCOLOR_ARGB(200,255,255,255);
-		element.font_color_.state_[YYUT_STATE_MOUSEOVER]=D3DCOLOR_ARGB(255,0,0,0);
-		SetDefaultElemt("button_up",element);
+		SetDefaultElemt("button_up_elem",element);
 
-		::SetRect(&texture_rc, 136, 0, 252, 54 );
-		element.SetTexture("desert",&texture_rc,D3DCOLOR_ARGB(0,255,255,255));
-		element.texture_color_.state_[YYUT_STATE_NORMAL]=D3DCOLOR_ARGB(160,255,255,255);
-		element.texture_color_.state_[YYUT_STATE_PRESSED]=D3DCOLOR_ARGB(60,0,0,0);
-		element.font_color_.state_[YYUT_STATE_MOUSEOVER]=D3DCOLOR_ARGB(30,255,255,255);
-		SetDefaultElemt("button_down",element);
+		::SetRect(&texture_rc, 0, 0, 256, 256 );
+		element.SetTexture("bt_press",&texture_rc,D3DCOLOR_ARGB(0,255,255,255));
+		SetDefaultElemt("button_down_elem",element);
+
+		::SetRect(&texture_rc, 0, 0, 256, 256 );
+		element.SetTexture("bt_move",&texture_rc,D3DCOLOR_ARGB(0,255,255,255));
+		SetDefaultElemt("button_move_elem",element);
 	}
 	shared_ptr<YYUTDialog> YYUTDialog::MakeDialog()
 	{
@@ -672,64 +658,31 @@ namespace YYUT
 			return;
 		RECT rc_screen=prc_dest;
 		OffsetRect(&rc_screen,x_,y_);
-		if(caption_enable_)
-			OffsetRect(&rc_screen,0,caption_height_);
 		D3DXMATRIX mat_transform;
 		D3DXMatrixIdentity(&mat_transform);
 		manager_->sprite_->SetTransform(&mat_transform);
 		shared_ptr<YYUTFontNode> sp_font=GetFont(element.font_id_);
-		if(shadow)
-		{
-			RECT rc_shadow=rc_screen;
-			OffsetRect(&rc_shadow,1,1);
-			sp_font->font_->DrawText(manager_->sprite_,text.c_str(),text.size(),&rc_shadow,element.text_format_,
-				D3DCOLOR_ARGB(DWORD(element.font_color_.current_.a*255),0,0,0));
-		}
 		sp_font->font_->DrawText(manager_->sprite_,text.c_str(),text.size(),&rc_screen,element.text_format_,element.font_color_.current_);
 	}
 
 	bool YYUTDialog::ProcessMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-
 		bool handled=false;
 		if(!visible_)
 			return false;
-		if(caption_enable_)
-		{
-			if(WM_LBUTTONDOWN ==uMsg || WM_LBUTTONDBLCLK==uMsg)
-			{
-				POINT mouse_point={short(LOWORD(lParam)),short(HIWORD(lParam))};
-				if(mouse_point.x>=x_	&& mouse_point.x<x_+width_ &&
-					mouse_point.y>=y_   && mouse_point.y<y_+caption_height_)
-				{
-					drag_=true;
-					SetCapture(hwnd_);
-					return true;
-				}
-			}
-		}
-		else if(WM_LBUTTONUP && drag_)
+		//YYUTDialog自身对鼠标的响应
+		if(WM_LBUTTONUP && be_pressed_)
 		{
 			POINT mouse_point={short(LOWORD(lParam)),short(HIWORD(lParam))};
 			if(mouse_point.x>=x_	&& mouse_point.x<x_+width_ &&
-				mouse_point.y>=y_   && mouse_point.y<y_+caption_height_)
+				mouse_point.y>=y_   && mouse_point.y<y_+height_)
 			{
 				ReleaseCapture();
-				drag_=false;
-				minimized_=!minimized_;
+				be_pressed_=false;
 				return true;
 			}
 		}
-		if(minimized_)
-			return false;
-		if(control_focus_)
-		{
-			if(control_focus_->dialog_.lock()==shared_from_this() && control_focus_->GetEnable())
-			{
-				if(control_focus_->MsgProc(uMsg,wParam,lParam))
-					return true;
-			}
-		}
+		
 		switch(uMsg)
 		{
 		case WM_SIZE:
@@ -767,13 +720,9 @@ namespace YYUT
 		case WM_XBUTTONDBLCLK:
 		case WM_MOUSEWHEEL:
 			{
-				if(!mouse_input_)
-					return false;
 				POINT mouse_point={short(LOWORD(lParam)),short(HIWORD(lParam))};
 				mouse_point.x-=x_;
 				mouse_point.y-=y_;
-				if(caption_enable_)
-					mouse_point.y-=caption_height_;
 				if(control_focus_)
 				{
 					if(shared_from_this()==control_focus_->dialog_.lock() && control_focus_->GetEnable())
@@ -791,6 +740,7 @@ namespace YYUT
 				}
 				else
 				{
+					//在dialog上的控件外
 					if(uMsg==WM_LBUTTONDOWN) 
 					{
 						if(control_focus_ && shared_from_this()==control_focus_->dialog_.lock())
@@ -811,7 +761,7 @@ namespace YYUT
 			{
 				if((HWND)lParam !=hwnd_)
 				{
-					drag_=false;
+					be_pressed_=false;
 				}
 			}
 		}
@@ -820,7 +770,6 @@ namespace YYUT
 
 	void YYUTDialog::OnMOuseUp(POINT pt)
 	{
-		control_pressed_=nullptr;
 		control_mouse_over_=nullptr;
 	}
 
@@ -838,7 +787,10 @@ namespace YYUT
 
 	void YYUTDialog::SetBackgroundColor(D3DCOLOR top_left,D3DCOLOR top_right,D3DCOLOR bottom_left,D3DCOLOR bottom_right)
 	{
-
+		color_top_left_=top_left;
+		color_top_right_=top_right;
+		color_bottom_left_=bottom_left;
+		color_bottom_right_=bottom_right;
 	}
 
 	void YYUTDialog::OnRender_imp(float elapsed_time)
@@ -868,8 +820,6 @@ namespace YYUT
 			BOOST_THROW_EXCEPTION(YYUTGUIException()<<err_str("can't find "+index+" font resource"));
 		return pos->second;
 	}
-
-	shared_ptr<YYUTControl> YYUTDialog::control_pressed_;
 
 	shared_ptr<YYUTControl> YYUTDialog::control_focus_;
 
@@ -1014,7 +964,6 @@ namespace YYUT
 					shared_ptr<YYUTDialog> dialog=dialog_.lock();
 					if(dialog)
 					{
-						if(!dialog->keyboard_input_)
 							dialog->ClearFocus();
 						if(ContainPoint(pt))
 							{
@@ -1044,35 +993,46 @@ namespace YYUT
 		else if(pressed_)
 		{
 			state=YYUT_STATE_PRESSED;
-			offset_x=1;
-			offset_y=2;
 		}
 		else if(mouse_over_)
 		{
 			state=YYUT_STATE_MOUSEOVER;
-			offset_x=-1;
-			offset_y=-2;
 		}
 		else if(has_focus_)
 		{
 			state=YYUT_STATE_FOCUS;
 		}
-		YYUTElement element=GetElemet("button_up");
-		float blend_rate=(state==YYUT_STATE_PRESSED)?0.0f:0.5f;
+		YYUTElement element_up=GetElemet("button_up_elem");
+		YYUTElement element_move=GetElemet("button_move_elem");
+		YYUTElement element_down=GetElemet("button_down_elem");
 		RECT rc_window=bounding_box_;
-		OffsetRect(&rc_window,offset_x,offset_y);
-
-		element.texture_color_.Blend(state,elapsed_time,blend_rate);
-		element.font_color_.Blend(state,elapsed_time,blend_rate);
+		//element.texture_color_.Blend(state,elapsed_time,blend_rate);
+		//element.font_color_.Blend(state,elapsed_time,blend_rate);
 		shared_ptr<YYUTDialog> dialog=dialog_.lock();
 		if(dialog)
 		{
-			dialog->DrawSprite(element,&rc_window);
-			dialog->DrawText(text_,element,rc_window);
-			element=GetElemet("button_down");
-			element.texture_color_.Blend(state,elapsed_time,blend_rate);
-			element.font_color_.Blend(state,elapsed_time,blend_rate);
-			dialog->DrawSprite(element,&rc_window);
+			switch(state)
+			{
+				case YYUT_STATE_NORMAL: 
+					dialog->DrawSprite(element_up,rc_window);
+					element_up.font_color_.current_=element_up.font_color_.state_[YYUT_STATE_NORMAL];
+					dialog->DrawText(text_,element_up,rc_window);
+					break;
+				case YYUT_STATE_FOCUS:
+				case YYUT_STATE_MOUSEOVER:
+					dialog->DrawSprite(element_move,rc_window);
+					element_move.font_color_.current_=element_up.font_color_.state_[YYUT_STATE_MOUSEOVER];
+					dialog->DrawText(text_,element_move,rc_window);
+					break;
+				case YYUT_STATE_PRESSED:
+					dialog->DrawSprite(element_down,rc_window);
+					element_down.font_color_.current_=element_up.font_color_.state_[YYUT_STATE_PRESSED];
+					dialog->DrawText(text_,element_down,rc_window);
+					break;
+				default:
+					break;
+			}
+			//dialog->DrawSprite(element,&rc_window);
 			//dialog->DrawText(text_,element,rc_window);
 		}
 		else

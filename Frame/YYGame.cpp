@@ -67,7 +67,6 @@ namespace YYUT
 		{
 			radius =100.0f;
 		}
-		cout<<radius<<endl;
 		mesh->UnlockVertexBuffer();
 		D3DXVECTOR3 eye(0.0f , 0.0f,radius*3);
 		D3DXVECTOR3 lookat( 0.0f, 0.0f, 1.0f );
@@ -108,7 +107,7 @@ namespace YYUT
 			world*=scale;
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
 			cell_mesh_->Draw();
-			hud_->OnRender((float)time_span);	
+			hud_->OnRender((float)time_elapse);	
 			GetD3D9Device()->EndScene();
 		}
 	}
@@ -146,20 +145,39 @@ namespace YYUT
 	{
 		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
 		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
-		int width=GetWidth();
-		hud_->SetLocation(width-500,0);
-		hud_->SetSize(500,500);
+		int height=GetHeight();
+		float scalar_width=0.15f;
+		float scalar_height=0.05f;
+		float scalar_seperate=0.008f;
+		int dialog_height=(int)(height*scalar_height);
+		int dialog_widht=GetWidth();
+		int control_width=(int)(scalar_width*dialog_widht);
+		int control_height=dialog_height;
+		int control_seperate=(int)(scalar_seperate*dialog_widht);
+		hud_->SetLocation(0,height-dialog_height);
+		hud_->SetSize(GetWidth(),dialog_height);
+		int index_x=0;
+		bt_fullscreen->ResetPosisionSize(index_x,0,control_width,control_height);
+		bt_sample2->ResetPosisionSize(index_x+=(control_width+control_seperate),0,control_width,control_height);
+		bt_sample3->ResetPosisionSize(index_x+=(control_width+control_seperate),0,control_width,control_height);
 	}
 
 	void YYGame::HUDInit()
 	{
 		hud_=YYUTDialog::MakeDialog();
-		hud_->Init(YYUTDialogResourceManager::GetInstance(),true);
-		int index_y=10;
-		shared_ptr<YYUTButton> bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",0,index_y,300,300);
+		hud_->Init(YYUTDialogResourceManager::GetInstance(),true); 
+		D3DXCOLOR dark_theme=D3DCOLOR_ARGB(100,14,17,42);
+		hud_->SetBackgroundColor(dark_theme);
+		int index_x=0;
+		int height=GetHeight();
+		float scalar=0.05f;
+		int dialog_height=(int)(height*scalar);
+		hud_->SetLocation(0,height-dialog_height);
+		hud_->SetSize(GetWidth(),dialog_height);
+		bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",index_x,0,300,dialog_height);
 		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
-		hud_->AddButton(IDC_TOGGLEREF,L"Toggle REF(F3)",0,index_y+=350,200,200);
-		//hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",35,index_y+=24,125,22,VK_F2);
+		bt_sample2=hud_->AddButton(IDC_TOGGLEREF,L"Sample(F2)",index_x+=310,0,300,dialog_height);
+		bt_sample3=hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",index_x+=310,0,300,dialog_height);
 	}
 
 
