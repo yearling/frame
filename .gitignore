@@ -33,3 +33,8 @@ $tf*/
 ipch/
 *.psess
 *.vsp
+!\*.png
+!\*jpg
+! /\*.jpg
+!/\*.png
+!Debug\back_color.png

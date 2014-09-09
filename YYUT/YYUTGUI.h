@@ -35,6 +35,7 @@ namespace YYUT
 	class   YYUTControl;
 	class   YYUTButton;
 	class   YYUTStatic;
+	class   YYUTAnimationStatic;
 	struct YYUTTextureNode
 	{
 		YYUTTextureNode();
@@ -80,7 +81,7 @@ namespace YYUT
 	public:
 		YYUTElement();
 		void SetTexture(string index_texture,RECT *prc_textrue,D3DCOLOR default_texture_color=D3DCOLOR_ARGB(255,255,255,255));
-		void SetFont(string index_font,D3DCOLOR default_font_color=D3DCOLOR_ARGB(255,255,255,255),DWORD text_format=DT_CENTER| DT_VCENTER);
+		void SetFont(string index_font,D3DCOLOR default_font_color=D3DCOLOR_ARGB(255,255,255,255),DWORD text_format=DT_CENTER| DT_VCENTER); 
 		void Refresh();
 		string texture_id_;
 		string font_id_;
@@ -103,7 +104,8 @@ namespace YYUT
 			HMODULE control_texture_resource_module);
 		bool ProcessMsg( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 		void AddStatic(int ID,wstring text,int x,int y,int width,int height,bool is_default=false,YYUTStatic **create=nullptr);
-		shared_ptr<YYUTButton> AddButton(int ID,wstring text,int x,int y,int width,int height,UINT hot_key=0U,bool is_default=false);
+		shared_ptr<YYUTButton> AddButton(int ID,wstring text,int x=0,int y=0,int width=0,int height=0,UINT hot_key=0U,bool is_default=false);
+		shared_ptr<YYUTAnimationStatic> AddStaticAnimate(int ID);
 		void AddControl(shared_ptr<YYUTControl> &control);
 		void InitControl(shared_ptr<YYUTControl>& control);
 		void InitControl(shared_ptr<YYUTControl>& control,YYUTElement const & ele);
@@ -114,13 +116,15 @@ namespace YYUT
 		shared_ptr<YYUTControl> GetControlAtPoint(POINT pt);
 		bool  GetControlEnable(int ID);
 		void  SetControlEnable(int ID,bool enable);
-		void  SetDefaultElemt(UINT control_type,UINT index_element,YYUTElement *element);
-		void  SetDefaultElemt(string element_id, const YYUTElement &element);
+		void  SetElemt(UINT control_type,UINT index_element,YYUTElement *element);
+		void  SetElemt(string element_id, const YYUTElement &element);
+		YYUTElement &GetDefaultElem(string element_id);
 		void SendEvent(UINT event,bool trigger_by_user,shared_ptr<YYUTControl> control);
 		void RequestFocus(shared_ptr<YYUTControl> &control);
 		void DrawRect(RECT *rect,D3DCOLOR color);
 		void DrawPolyLine(PINT * points,UINT number,D3DCOLOR color);
 		void DrawSprite(YYUTElement &elemet,RECT &prc_dest);
+		void DrawSprite(YYUTElement &elemet,RECT &prc_dest,float angle);
 		void DrawText(wstring text, YYUTElement & element,RECT &prc_dest,bool shadow =false,int count=-1);
 		void CalcTextRect(wstring text,shared_ptr<YYUTElement> element,RECT *prc_dest,bool shadow=false,int count=-1);
 		bool GetVisible() { return visible_;}
@@ -132,7 +136,9 @@ namespace YYUT
 		void SetBackgroundColor(D3DCOLOR top_left,D3DCOLOR top_right,D3DCOLOR bottom_left,D3DCOLOR bottom_right);
 		void GetLocation(POINT &pt) const { pt.x=x_;pt.y=y_;}
 		void SetLocation(int x,int y) {x_=x;y_=y;}
+		void SetLocation(float x,float y);
 		void SetSize(int width,int height){width_=width;height_=height;}
+		void SetSize(float width,float height);
 		static void SetRefreshTime(float time) { time_refresh_=time;}
 		void RemoveControl(int ID);
 		void RemoveAllControl();
@@ -141,7 +147,7 @@ namespace YYUT
 		bool non_user_events_;
 		void Refresh();
 		void OnRender(float elapsed_time);
-		void SetFont(string name_id,wstring face_name,long height,long weight);
+		void SetFont(string name_id,wstring face_name,long height=18,long weight=FW_NORMAL);
 		void SetTexture(string  name_id,wstring file_name);
 		shared_ptr<YYUTTextureNode> GetTexture(string index);
 		shared_ptr<YYUTFontNode> GetFont(string index);
@@ -151,7 +157,9 @@ namespace YYUT
 		~YYUTDialog();
 		void SetGUIEvent(FUNCTION_GUI_EVENT &eve){gui_event_=eve;}
 		inline HWND GetHWND(){return hwnd_;}
-		
+		int GetWidth() const{ return width_;}
+		int Getheight() const{ return height_;}
+		void SetFont(string id,float scalar);
 	protected:
 		YYUTDialog();
 		FUNCTION_GUI_EVENT gui_event_;
@@ -183,6 +191,7 @@ namespace YYUT
 		std::map<string,shared_ptr<YYUTTextureNode>> texture_map_;
 		std::map<string,YYUTElement> element_map_;
 		HWND hwnd_;
+		float font_scalar_;
 	};
 	class YYUTDialogResourceManager:boost::noncopyable
 	{
@@ -191,21 +200,26 @@ namespace YYUT
 		bool MsgProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 		void OnD3DCreateDevice(LPDIRECT3DDEVICE9 d3d_device);
 		void OnD3DResetDevice();
+		void OnD3DResetDevice(int width,int height);
 		void OnD3DLostDevice();
 		void OnD3DDestroyDevice();
 		void SetHWND(HWND hwnd);
+		void SetWidth(int width){width_=width;};
+		void SetHeight(int height){height_=height;}
+		int  GetWidth() const { return width_;}
+		int GetHeigth() const { return height_;}
 		inline HWND GetHWND(){ return hwnd_;}
 		CComPtr<IDirect3DDevice9> GetD3D9Device() const { return d3d_device_;}
 		//std::shared_ptr<YYUTFontNode>  GetFontNode(int index) const{ return vec_font_.at(index); }
 		//std::shared_ptr<YYUTTextureNode> GetTextureNode(int index) const{ return vec_texture_.at(index);}
-		shared_ptr<YYUTFontNode> AddFont(wstring face_name,long height,long weight);
+		shared_ptr<YYUTFontNode> AddFont(wstring face_name,long height=18,long weight=FW_NORMAL);
 		shared_ptr<YYUTTextureNode> AddTexture(wstring file_name);
 		void EnableKeyboardInputForAllDialogs();
 	public:
 		CComPtr<IDirect3DStateBlock9> state_block_;
 		CComPtr<ID3DXSprite> sprite_;
-		unsigned int back_buffer_width_;
-		unsigned int back_buffer_height_;
+		unsigned int width_;
+		unsigned int height_;
 	protected:
 		YYUTDialogResourceManager();
 		~YYUTDialogResourceManager();
@@ -245,7 +259,9 @@ namespace YYUT
 		int GetID() const {return ID_;}
 		void SetID(int id){ID_=id;}
 		void SetLocation(int x,int y){x_=x;y_=y;UpdateRect();}
+		void SetLocation(float x,float y);
 		void SetSize(int width,int height){width_=width;height_=height;UpdateRect();}
+		void SetSize(float width,float height);
 		void ResetPosisionSize(int x,int y,int width,int height)
 		{
 			x_=x;
@@ -254,6 +270,7 @@ namespace YYUT
 			height_=height;
 			UpdateRect();
 		}
+		void ResetPosisionSize(float x,float y,float width,float height);
 		void SetHotKey(UINT hotKey){hot_key_=hotKey;}
 		UINT GetHotKey(){return hot_key_;}
 		virtual void SetTextColor(D3DCOLOR color);
@@ -290,6 +307,26 @@ namespace YYUT
 	protected:
 		wstring text_;
 	};
+	class YYUTAnimationStatic:public YYUTStatic
+	{
+	public:
+		YYUTAnimationStatic(weak_ptr<YYUTDialog> dialog);
+		virtual bool HandleMouse(UINT uMsg,POINT pt,WPARAM wParam,LPARAM lParam);
+		virtual bool ContainPoint(POINT pt);		
+		virtual bool CanHaveFocus()
+		{
+			return (visible_ && enable_);
+		}
+		virtual void Render(float elapsed_time);
+		static shared_ptr<YYUTAnimationStatic> MakeInstance(weak_ptr<YYUTDialog> p);
+	protected:
+		D3DXVECTOR2 center_;
+		float       radius_;
+		YYUT_CONTROL_STATE state;
+		YYUT_CONTROL_STATE pre_state;
+		float       big_circle_angle;
+		float       small_circle_angle;
+	};
 	class YYUTButton:public YYUTStatic
 	{
 	public:
@@ -317,6 +354,10 @@ namespace YYUT
 		static shared_ptr<YYUTButton> MakeInstance(weak_ptr<YYUTDialog> p);
 	protected:
 		bool pressed_;
+		YYUT_CONTROL_STATE state;
+		YYUT_CONTROL_STATE pre_state;
+		RECT rc_window;
+		float right_side;
 	};
 }
 

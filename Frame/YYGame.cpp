@@ -10,6 +10,7 @@ namespace YYUT
 	const int  IDC_TOGGLEFULLSCREEN   =1;
 	const int  IDC_TOGGLEREF          =2;
 	const int  IDC_CHANGEDEVICE       =3;
+	const int  IDC_FPS				  =4;
 	YYGame::YYGame(void)
 	{
 	}
@@ -23,12 +24,11 @@ namespace YYUT
 	void YYGame::GameResourceReset()
 	try{
 		HUDRest();
-		int width=GetCurrentDeviceSettings()->pp.BackBufferWidth;
-		int height=GetCurrentDeviceSettings()->pp.BackBufferHeight;
+		int width=GetWidth();
+		int height=GetHeight();
 		float aspect=(float)width/(float)height;
 		camera_.SetProjParam(D3DX_PI/4,aspect,1.0f,1000.0f);
 		camera_.SetWindow(width,height);
-		//camera_.SetWindow(width,height);
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -88,6 +88,11 @@ namespace YYUT
 	void YYGame::GameMain(double time_span, double time_elapse)
 	{
 		camera_.FrameMove((float)time_elapse);
+		int fps=(int)GetFPS();
+		wstringstream ss;
+		ss<<fps;
+		wstring str_fps(ss.str());
+		bt_fps_->SetText(str_fps);	
 		GetD3D9Device()->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_STENCIL|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 100, 0, 0 ), 1.0f, 0 );
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
@@ -100,6 +105,9 @@ namespace YYUT
 			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&proj);
 
 			GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
+			//////////////////////////////////////////////////////////////////////////
+			
+			//////////////////////////////////////////////////////////////////////////
 			robot_mesh_->Draw();	
 			D3DXMatrixIdentity(&world);
 			D3DXMATRIX scale;
@@ -107,7 +115,12 @@ namespace YYUT
 			world*=scale;
 			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
 			cell_mesh_->Draw();
+			//////////////////////////////////////////////////////////////////////////
+			//draw controls eq: button animate_static dialog huds;
 			hud_->OnRender((float)time_elapse);	
+			hud_fps_->OnRender((float)time_elapse);
+			//////////////////////////////////////////////////////////////////////////
+				
 			GetD3D9Device()->EndScene();
 		}
 	}
@@ -144,40 +157,43 @@ namespace YYUT
 	void YYGame::HUDRest()
 	{
 		GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
-		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice();
+		YYUTDialogResourceManager::GetInstance()->OnD3DResetDevice(GetWidth(),GetHeight());
 		int height=GetHeight();
-		float scalar_width=0.15f;
-		float scalar_height=0.05f;
+		float scalar_width=0.18f;
+		float scalar_height=0.0618f;
 		float scalar_seperate=0.008f;
-		int dialog_height=(int)(height*scalar_height);
-		int dialog_widht=GetWidth();
-		int control_width=(int)(scalar_width*dialog_widht);
-		int control_height=dialog_height;
-		int control_seperate=(int)(scalar_seperate*dialog_widht);
-		hud_->SetLocation(0,height-dialog_height);
-		hud_->SetSize(GetWidth(),dialog_height);
-		int index_x=0;
-		bt_fullscreen->ResetPosisionSize(index_x,0,control_width,control_height);
-		bt_sample2->ResetPosisionSize(index_x+=(control_width+control_seperate),0,control_width,control_height);
-		bt_sample3->ResetPosisionSize(index_x+=(control_width+control_seperate),0,control_width,control_height);
+		D3DXCOLOR dark_theme=D3DCOLOR_ARGB(100,14,17,42);
+		hud_->SetBackgroundColor(dark_theme);
+		hud_->SetLocation(0.0f,1-scalar_height);
+		hud_->SetSize(1.0f,scalar_height);
+		hud_->SetFont("default_font",0.77f);
+		float index_x=0.0f;
+		bt_fullscreen->ResetPosisionSize(index_x,0.0f,scalar_width,1.0f);
+		bt_sample2->ResetPosisionSize(index_x+=(scalar_width+scalar_seperate),0.0f,scalar_width,1.0f);
+		bt_sample3->ResetPosisionSize(index_x+=(scalar_width+scalar_seperate),0.0f,scalar_width,1.0f);
+		float hud_locate_x=0.9f;
+		float hud_fps_width=1-hud_locate_x;
+		float asper=(float)GetWidth()/(float)GetHeight();
+		float hud_fps_height=hud_fps_width*asper;
+		hud_fps_->SetLocation(hud_locate_x,0.0f);
+		hud_fps_->SetSize(hud_fps_width,hud_fps_height);
+		hud_fps_->SetBackgroundColor(D3DCOLOR_ARGB(0,14,17,42));
+		hud_fps_->SetFont("default_font",0.50f);
+		bt_fps_->SetLocation(0.0f,0.0f);
+		bt_fps_->SetSize(1.0f,1.0f);
 	}
 
 	void YYGame::HUDInit()
 	{
 		hud_=YYUTDialog::MakeDialog();
+		hud_fps_=YYUTDialog::MakeDialog();
 		hud_->Init(YYUTDialogResourceManager::GetInstance(),true); 
-		D3DXCOLOR dark_theme=D3DCOLOR_ARGB(100,14,17,42);
-		hud_->SetBackgroundColor(dark_theme);
-		int index_x=0;
-		int height=GetHeight();
-		float scalar=0.05f;
-		int dialog_height=(int)(height*scalar);
-		hud_->SetLocation(0,height-dialog_height);
-		hud_->SetSize(GetWidth(),dialog_height);
-		bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen",index_x,0,300,dialog_height);
+		hud_fps_->Init(YYUTDialogResourceManager::GetInstance(),true);	
+		bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen");
 		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
-		bt_sample2=hud_->AddButton(IDC_TOGGLEREF,L"Sample(F2)",index_x+=310,0,300,dialog_height);
-		bt_sample3=hud_->AddButton(IDC_CHANGEDEVICE,L"Change device(F2)",index_x+=310,0,300,dialog_height);
+		bt_sample2=hud_->AddButton(IDC_TOGGLEREF,L"Sample1");
+		bt_sample3=hud_->AddButton(IDC_CHANGEDEVICE,L"Sample2");
+		bt_fps_=hud_fps_->AddStaticAnimate(IDC_FPS);
 	}
 
 

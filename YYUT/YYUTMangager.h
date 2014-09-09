@@ -91,7 +91,6 @@ namespace YYUT
 							const D3DSURFACE_DESC* pBackBufferSurfaceDesc,
 							void* pUserContext );
 		virtual bool		OnResetDevice( void* pUserContext );
-		virtual void		OnFrameMove( double fTime, float fElapsedTime);
 		virtual void		OnFrameRender(double fTime, float fElapsedTime);
 		virtual void		OnLostDevice( void* pUserContext );
 		virtual void		OnDestroyDevice( void* pUserContext );
@@ -131,6 +130,7 @@ namespace YYUT
 				void		Create3DEnvironment9();
 				HRESULT		Reset3DEnvironment();
 				bool		FindVaildDeviceSettings(YYUTD3D9DeviceSettings* dev_set);
+				void		UpdateFrameStatus();
 	private:
 		class YYUTLock
 		{

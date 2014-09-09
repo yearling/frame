@@ -31,11 +31,13 @@ namespace YYUT
 		YYUTModelViewerCamera camera_;
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
+		std::shared_ptr<YYUTDialog> hud_fps_;
 		std::shared_ptr<YYUTObjectX> robot_mesh_;
 		std::shared_ptr<YYUTObjectX> cell_mesh_;
 		shared_ptr<YYUTButton> bt_fullscreen;
 		shared_ptr<YYUTButton> bt_sample2;
 		shared_ptr<YYUTButton> bt_sample3;
+		shared_ptr<YYUTAnimationStatic> bt_fps_;
 	};
 
 }

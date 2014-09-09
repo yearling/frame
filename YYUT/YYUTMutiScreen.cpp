@@ -257,7 +257,7 @@ namespace YYUT
 					if(after)
 						::SetWindowPos(hWnd,after,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
 					else
-						::SetWindowPos(hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
+						::SetWindowPos(hWnd,0,0,0,0,0,SWP_NOSIZE|SWP_SHOWWINDOW|SWP_NOACTIVATE );
 				}
 			}
 			//找到visual studio的窗口并把它设到副窗口

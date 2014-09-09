@@ -119,7 +119,7 @@ namespace YYUT
 		wcex.lpszClassName	=	_Regstr;
 		wcex.hIconSm		=	 LoadIcon(NULL, IDI_APPLICATION);
 		$err_hr=RegisterClassEx(&wcex);
-		hwnd=CreateWindow(_Regstr,window_name, WS_OVERLAPPEDWINDOW,
+		hwnd=CreateWindow(_Regstr,window_name, WS_CAPTION|WS_SIZEBOX,
 			CW_USEDEFAULT, CW_USEDEFAULT, width, height, NULL, NULL, main_instance, NULL);
 		$err_hr=GetLastError();
 		if(hwnd)

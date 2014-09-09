@@ -420,13 +420,13 @@ void YYUT::YYUTManager::Initial()
 		FreeLibrary( hUser32 );
 	}
 	YYUTTimer::GetInstance().Reset();
-	int default_x=800;
-	int default_y=600;
+	int default_x=1920;
+	int default_y=1080;
 	try
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
 #if defined( DEBUG ) || defined( _DEBUG )
-		YYUT::YYSetConsoleA();		
+		YYUT::YYSetConsoleA(*main_window);		
 #endif // _DEBUG
 		SetHInstance(main_instance);
 		SetHWNDFocus(main_window->hwnd);
@@ -466,6 +466,7 @@ YYUTManager::YYUTManager()
 	SetIgnoreSizeChange(true);
 	memset(&CurrentDeviceSettings_,0,sizeof(CurrentDeviceSettings_));
 	not_first_time=false;
+	SetTopmostWhileWindowd(true);
 }
 
 YYUTManager::~YYUTManager()
@@ -490,10 +491,6 @@ bool YYUTManager::OnResetDevice(void* pUserContext)
 	return true;
 }
 
-void YYUTManager::OnFrameMove(double fTime, float fElapsedTime)
-{
-
-}
 
 void YYUTManager::OnFrameRender(double fTime, float fElapsedTime)
 {
@@ -688,13 +685,19 @@ HRESULT YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Setti
 	{
 		if(not_first_time)
 			Cleanup3DEnvironment9(false);
-		try{Create3DEnvironment9();}
+		try{
+			Create3DEnvironment9();
+		}
 		catch(...){
 			Cleanup3DEnvironment9(true);
 			Pause(false,false);
 			SetIgnoreSizeChange(false);
 			throw;
 		}
+	}
+	if(!not_first_time)
+	{
+		SetWindowPos(GetHWNDDeviceWindowed(),HWND_NOTOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOREDRAW|SWP_NOSIZE);
 	}
 	if(not_first_time&&!old_d3ddevice_setting.pp.Windowed&&new_device_Settings->pp.Windowed)
 	{
@@ -754,7 +757,6 @@ HRESULT YYUTManager::Reset3DEnvironment()
 	}
 	SetCurrentDeviceSettings(&device_setting);
 	UpdateBackBufferDes();
-	SetCurrentDeviceSettings(&device_setting);
 	SetupCursor();
 	if(!OnResetDevice(NULL))
 	{
@@ -1071,6 +1073,22 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	return GetCurrentDeviceSettings()->pp.BackBufferHeight;
  }
 
+ void YYUT::YYUTManager::UpdateFrameStatus()
+ {
+	 double last_update_time=GetLastStatusUpdateTime();
+	 double now_time=YYUTTimer::GetInstance().GetAbsoluteTime();
+     DWORD frame_num=GetLastStatusUpdateFrames();
+	 frame_num++;
+	 SetLastStatusUpdateFrames(frame_num);
+	 if(now_time-last_update_time>1.0)
+	 {
+		 float fps=static_cast<float>(frame_num/(now_time-last_update_time));
+		 SetFPS(fps);
+		 SetLastStatusUpdateFrames(0);
+		 SetLastStatusUpdateTime(now_time);
+	 }
+ }
+
 void YYUTManager::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
 {
 
@@ -1175,7 +1193,7 @@ void YYUTManager::Render3DEnvironment()
 	SetTime(time);
 	SetAbsoluteTime(abs_time);
 	SetElapsedTime(elapsed_time);
-	OnFrameMove(time,elapsed_time);
+	UpdateFrameStatus();
 	if(!GetRenderingPaused())
 	{
 		OnFrameRender(time,elapsed_time);
