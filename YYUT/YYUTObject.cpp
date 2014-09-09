@@ -9,7 +9,11 @@ namespace YYUT
 		HRESULT hr;
 		CComPtr<ID3DXBuffer> material_buf;
 		DWORD num_material=0;
-		wstring pre_path=file_name.substr(0,file_name.find_last_of(L'/'));
+		//wstring pre_path=file_name.substr(0,file_name.rfind(L'\\'));
+		wstring pre_path;
+		auto pos=file_name.rfind(L'\\');
+		if(pos!=file_name.npos)
+			pre_path=file_name.substr(0,pos+1);
 		string pre_path_A(pre_path.begin(),pre_path.end());
 		string texture_path;
 		hr=D3DXLoadMeshFromX(file_name.c_str(),D3DXMESH_MANAGED,d3d_dev_,nullptr,&material_buf,nullptr,&num_material,&mesh_);

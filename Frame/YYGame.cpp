@@ -50,10 +50,10 @@ namespace YYUT
 		
 		robot_mesh_=make_shared<YYUTObjectX>();
 		robot_mesh_->Init(GetD3D9Device());
-		robot_mesh_->LoadObject(_T("..//media//robot.x"));
+		robot_mesh_->LoadObject(_T("..\\media\\robot\\robot.x"));
 		cell_mesh_=make_shared<YYUTObjectX>();
 		cell_mesh_->Init(GetD3D9Device());
-		cell_mesh_->LoadObject(_T("..//media//cell.x"));
+		cell_mesh_->LoadObject(_T("..\\media\\cell\\cell.x"));
 		byte* vertex_buf=nullptr;
 		auto mesh=robot_mesh_->GetMesh();
 		mesh->LockVertexBuffer(0, (void**)&vertex_buf);
