@@ -61,6 +61,9 @@
     <ClCompile Include="..\YYUT\YYUTCamera.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTThread.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="YYGame.h">
@@ -94,6 +97,18 @@
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTObject.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMutiThread.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTBlockingQueue.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTBoundBlockingQueue.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTThread.h">
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
   </ItemGroup>

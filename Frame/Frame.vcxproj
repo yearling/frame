@@ -171,6 +171,7 @@
     <ClCompile Include="..\YYUT\YYUTGUI.cpp" />
     <ClCompile Include="..\YYUT\YYUTMangager.cpp" />
     <ClCompile Include="..\YYUT\YYUTObject.cpp" />
+    <ClCompile Include="..\YYUT\YYUTThread.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
     <ClCompile Include="MainApp.cpp" />
@@ -180,11 +181,15 @@
     <ClInclude Include="..\YYUT\stdafx.h" />
     <ClInclude Include="..\YYUT\YYUT.h" />
     <ClInclude Include="..\YYUT\YYUTApplication.h" />
+    <ClInclude Include="..\YYUT\YYUTBlockingQueue.h" />
+    <ClInclude Include="..\YYUT\YYUTBoundBlockingQueue.h" />
     <ClInclude Include="..\YYUT\YYUTCamera.h" />
     <ClInclude Include="..\YYUT\YYUTenum.h" />
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
+    <ClInclude Include="..\YYUT\YYUTMutiThread.h" />
     <ClInclude Include="..\YYUT\YYUTObject.h" />
+    <ClInclude Include="..\YYUT\YYUTThread.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
     <ClInclude Include="YYGame.h" />

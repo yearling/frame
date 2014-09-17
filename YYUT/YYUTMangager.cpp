@@ -1112,7 +1112,7 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 			device_setting.pp.Windowed=windowd;
 			device_setting.pp.BackBufferWidth=width;
 			device_setting.pp.BackBufferHeight=height;
-			device_setting.behavior_flags=D3DCREATE_HARDWARE_VERTEXPROCESSING;
+			device_setting.behavior_flags=D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_MULTITHREADED;
 			if(FindVaildDeviceSettings(&device_setting))
 			{
 #if defined( DEBUG ) || defined( _DEBUG )
