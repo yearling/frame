@@ -198,6 +198,7 @@ namespace YYUT
 
 	void YYUTBaseCamera::SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		if(NULL==eye || NULL==lookat)
 			return;
 		default_eye_=eye_=*eye;
@@ -225,6 +226,7 @@ namespace YYUT
 
 	void YYUTBaseCamera::SetProjParam(float FOV,float aspect,float near_plane,float far_plane)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		FOV_=FOV;
 		aspect_=aspect;
 		near_plane_=near_plane;
@@ -234,6 +236,7 @@ namespace YYUT
 	//通过接收windos message来设置某些状态位
 	bool YYUTBaseCamera::HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		switch(uMsg)
 		{
 		case WM_KEYDOWN:
@@ -485,6 +488,7 @@ namespace YYUT
 
 	void YYUTBaseCamera::Reset()
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		SetViewParam(&default_eye_,&default_lookat_);
 	}
 
@@ -512,7 +516,7 @@ namespace YYUT
 		rotate_camera_button_mask_=MOUSE_RIGHT_BUTTON;
 		drag_since_last_update_=true;
 		radius_=35.0f;
-		D3DXMatrixIdentity(&world_);
+
 	}
 
 	YYUTModelViewerCamera::~YYUTModelViewerCamera()
@@ -522,6 +526,7 @@ namespace YYUT
 
 	void YYUTModelViewerCamera::FrameMove(float elapse_time)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		if(IsKeyDown(key_mask_[CAM_RESET]))
 			Reset();
 		if(!drag_since_last_update_ && 0==keys_down_)
@@ -807,6 +812,7 @@ namespace YYUT
 
 	void YYUTFirstPersonCamera::FrameMove(float elapse_time)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		if(IsKeyDown(key_mask_[CAM_RESET]))
 			Reset();
 		GetInput(enable_position_movement_,true,reset_cursor_after_move_);

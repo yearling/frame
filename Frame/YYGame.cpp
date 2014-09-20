@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <boost/exception/all.hpp>
 #include "YYUT.h"
+#include "YYUTMsgPackege.h"
 namespace YYUT
 {
 
@@ -133,26 +134,7 @@ namespace YYUT
 	{
 	}
 
-	void YYGame::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
-	{
-	}
 
-	HRESULT YYGame::PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &further_process)
-	{
-		further_process=YYUTDialogResourceManager::GetInstance()->MsgProc(hWnd,uMsg,wParam,lParam);
-		if(further_process)
-			return 0;
-		if(hud_)
-		{
-			further_process=hud_->ProcessMsg(hWnd,uMsg,wParam,lParam);
-			if(further_process)
-			return 0;
-		}
-		camera_.HandleMessage(hWnd,uMsg,wParam,lParam);
-		
-		further_process=false;
-		return 0;
-	}
 
 	void YYGame::HUDRest()
 	{
@@ -189,13 +171,30 @@ namespace YYUT
 		hud_fps_=YYUTDialog::MakeDialog();
 		hud_->Init(YYUTDialogResourceManager::GetInstance(),true); 
 		hud_fps_->Init(YYUTDialogResourceManager::GetInstance(),true);	
-		bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Toggle full screen");
+		bt_fullscreen=hud_->AddButton(IDC_TOGGLEFULLSCREEN,L"Full Screen");
 		bt_fullscreen->SetEvent(std::bind(&YYGame::ToggleFullScreen,this));
-		bt_sample2=hud_->AddButton(IDC_TOGGLEREF,L"Sample1");
-		bt_sample3=hud_->AddButton(IDC_CHANGEDEVICE,L"Sample2");
+		bt_sample2=hud_->AddButton(IDC_TOGGLEREF,L"Pause");
+		bt_sample2->SetEvent(std::bind(&YYUTManager::Pause,this,false,true));
+		bt_sample3=hud_->AddButton(IDC_CHANGEDEVICE,L"Resume");
+		bt_sample3->SetEvent(std::bind(&YYUTManager::Pause,this,false,false));
 		bt_fps_=hud_fps_->AddStaticAnimate(IDC_FPS);
 	}
 
+	void YYGame::KeyboardMouseProc()
+	{
+		for(;;)
+		{
+			YYUTWindowsMsg msg=GetKeyBoardMouseMSGQueue().Take();
+			if(hud_)
+			{
+				hud_->ProcessMsg(GetHWND(),msg.uMsg,msg.wParam,msg.lParam);
+			}
+			camera_.HandleMessage(GetHWND(),msg.uMsg,msg.wParam,msg.lParam);
+		}
+	}
 
-	
+	void YYGame::ToggleFullScreen()
+	{
+		::SendMessage(GetHWND(),WM_FULLSCREEN,0,0);
+	}
 }

@@ -4,8 +4,21 @@
 #include "stdafx.h"
 #include "YYUT.h"
 #include "YYUTApplication.h"
+#include "YYUTMutiThread.h"
+#include <memory>
+using std::shared_ptr;
+#define  SET_ACCESSOR(x,y)  inline void Set##y( x t) {YYUTMutexLockGuard lock(mutex_);y=t;};
+#define  GET_ACCESSOR(x,y)  inline x Get##y()  {YYUTMutexLockGuard lock(mutex_); return y;};
+#define  GET_SET_ACCESSOR(x,y) SET_ACCESSOR(x,y) GET_ACCESSOR(x,y)
+
+#define  SETP_ACCESSOR(x,y) inline void Set##y(x * t) {YYUTMutexLockGuard lock(mutex_); y=*t;};
+#define  GETP_ACCESSOR(x,y) inline x* Get##y() {YYUTMutexLockGuard lock(mutex_); return &y;};
+#define  GETP_SETP_ACCESSOR(x,y) SETP_ACCESSOR(x,y) GETP_ACCESSOR(x,y)
+
+#define WM_FULLSCREEN      WM_USER+100
 namespace YYUT
 {
+
 	struct YYUTManagerException:virtual YYUTException{};
 	//struct boost::error_info<struct tag_yyut_D3DPRESENT_PARAMETERS,_D3DPRESENT_PARAMETERS_> errinfo_D3DPRESENT_PARAMETERS; 
 	class YYUTManager:public YYUTApplication 
@@ -60,8 +73,6 @@ namespace YYUT
 		GET_SET_ACCESSOR( int, ExitCode );
 		GET_SET_ACCESSOR(bool,TimePaused);
 		GET_SET_ACCESSOR(bool,RenderingPaused);
-		GET_SET_ACCESSOR(int,PauseRenderingCount);
-		GET_SET_ACCESSOR(int,PauseTimeCount);
 		GET_SET_ACCESSOR(bool,DeviceLost);
 		GET_SET_ACCESSOR(bool,DeviceObjectsCreated);
 		GET_SET_ACCESSOR(bool,DeviceObjectsReset);
@@ -74,19 +85,18 @@ namespace YYUT
 		GET_ACCESSOR(WCHAR*,DeviceStats);
 		const YYUTD3D9DeviceSettings *GetCurrentDeviceSettings()
 		{
-			YYUTLock l;
+			YYUTMutexLockGuard lock(mutex_);
 			 return &CurrentDeviceSettings_;
 		}
 		void SetCurrentDeviceSettings(YYUTD3D9DeviceSettings* setting) 
 		{
-			YYUTLock l;
+			YYUTMutexLockGuard lock(mutex_);
 			if(setting)
 			CurrentDeviceSettings_=*setting;	
 		}
 	public:
 		virtual void		Initial();
 		virtual void		Exit();
-		virtual bool		ModifyDeviceSettings( YYUTD3D9DeviceSettings* pDeviceSettings);
 		virtual HRESULT		OnCreateDevice( IDirect3DDevice9* pd3dDevice, 
 							const D3DSURFACE_DESC* pBackBufferSurfaceDesc,
 							void* pUserContext );
@@ -104,17 +114,12 @@ namespace YYUT
 		virtual void		GameExit();
 				void		Pause(bool _time,bool _render);
 				void		ShutDown();
-		inline  bool		IsRenderPaused();
-				void		ToggleFullScreen();
+				void ToggleFullScreenImp();
 				int         GetWidth();
 				int			GetHeight();
 	protected:
 		virtual LRESULT		MyProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) throw();
-		virtual HRESULT		PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process);
-		virtual void		KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown);
-		virtual void		MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, 
-							bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, 
-							int xPos, int yPos);
+		virtual	void		KeyboardMouseProc(void);
 		virtual int			Run();
 		inline  HWND		GetHWND();
 		inline  bool		IsWindowed();
@@ -131,16 +136,7 @@ namespace YYUT
 				HRESULT		Reset3DEnvironment();
 				bool		FindVaildDeviceSettings(YYUTD3D9DeviceSettings* dev_set);
 				void		UpdateFrameStatus();
-	private:
-		class YYUTLock
-		{
-		public:
-			inline YYUTLock();
-			inline ~YYUTLock();
-			static void Init();
-		private:
-			static CRITICAL_SECTION cs;
-		};
+		YYUTMsgQueue<YYUTWindowsMsg> &GetKeyBoardMouseMSGQueue();
 	private:
 		IDirect3D9*					D3D9;
 		IDirect3DDevice9*			D3D9Device;
@@ -202,6 +198,15 @@ namespace YYUT
 		int							width_;
 		int							height_;
 		bool                        not_first_time;
+		YYUTMutexLock				mutex_;
+		YYUTMsgQueue<YYUTWindowsMsg>	    keyboard_mouse_msg_queue_;
+		shared_ptr<YYUTThread>      input_thread_;
+		shared_ptr<YYUTThread>      render_thread_;
+		shared_ptr<YYUTThread>      load_data_thread_;
+		YYUTMutexLock				render_pause_lock_;
+		bool						render_frame_finished_;
+		YYUTCondition               render_pause_condition_;
+		YYUTCondition				render_frame_finished_condition_;
 	};
 }
 #endif

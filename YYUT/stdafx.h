@@ -14,10 +14,18 @@
 #include <dxfile.h>
 #include <d3dx9xof.h>
 #include <vector>
-#include <YYUTTimer.h>
-#include <YYUTMutiScreen.h>
-
-
+#include <string>
+#include <iostream>
+using std::string;
+using std::wstring;
+using std::cout;
+using std::wcout;
+using std::endl;
+//#include <YYUTMutiScreen.h>
+//#include <YYUTMutiThread.h>
+//#include <YYUTMangager.h>
+//#include <YYUTGUI.h>
+//#include <YYUTTimer.h>
 
 
 

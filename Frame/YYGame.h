@@ -20,11 +20,9 @@ namespace YYUT
 		virtual void GameMain(double time_span, double time_elapse);
 		virtual void		GameInit();
 		virtual void		GameExit();
-		virtual void		MouseProc( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, 
-			bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, 
-			int xPos, int yPos);
-		virtual HRESULT		PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process);
 				void		OnGUIEvent();
+		virtual void        KeyboardMouseProc();
+		void ToggleFullScreen();
 	protected:
 		void HUDRest();
 		void HUDInit();

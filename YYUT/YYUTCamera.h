@@ -2,6 +2,8 @@
 #ifndef __YYUT_CAMERA_H__
 #define __YYUT_CAMERA_H__
 #include "stdafx.h"
+#include "YYUT.h"
+#include "YYUTMutiThread.h"
 namespace YYUT
 {
 	class YYUTArcBall
@@ -168,6 +170,7 @@ namespace YYUT
 		HWND hwnd_;
 		int width_;
 		int height_;
+		YYUTMutexLock mutex_;
 	};
 	class YYUTEASYCamera:public YYUTBaseCamera
 	{

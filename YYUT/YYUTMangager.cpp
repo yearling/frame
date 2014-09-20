@@ -14,195 +14,8 @@ using namespace YYUT;
 LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) throw()
 {
 	try{
-	if(uMsg==WM_MOUSEMOVE)
-	{
-		short x=LOWORD(lParam);
-		short y=HIWORD(lParam);
-	}
-	// Consolidate the keyboard messages and pass them to the app's keyboard callback
-	if( uMsg == WM_KEYDOWN ||
-		uMsg == WM_SYSKEYDOWN ||
-		uMsg == WM_KEYUP ||
-		uMsg == WM_SYSKEYUP )
-	{
-		bool bKeyDown = ( uMsg == WM_KEYDOWN || uMsg == WM_SYSKEYDOWN );
-		DWORD dwMask = ( 1 << 29 );
-		bool bAltDown = ( ( lParam & dwMask ) != 0 );
-
-		bool* bKeys = GetKeys();
-		bKeys[ ( BYTE )( wParam & 0xFF ) ] = bKeyDown;
-		this->KeyboardProc( ( UINT )wParam, bKeyDown, bAltDown);
-	}
-
-	// Consolidate the mouse button messages and pass them to the app's mouse callback
-	if( uMsg == WM_LBUTTONDOWN ||
-		uMsg == WM_LBUTTONUP ||
-		uMsg == WM_LBUTTONDBLCLK ||
-		uMsg == WM_MBUTTONDOWN ||
-		uMsg == WM_MBUTTONUP ||
-		uMsg == WM_MBUTTONDBLCLK ||
-		uMsg == WM_RBUTTONDOWN ||
-		uMsg == WM_RBUTTONUP ||
-		uMsg == WM_RBUTTONDBLCLK ||
-		uMsg == WM_XBUTTONDOWN ||
-		uMsg == WM_XBUTTONUP ||
-		uMsg == WM_XBUTTONDBLCLK ||
-		uMsg == WM_MOUSEWHEEL)
-	{
-		int xPos = ( short )LOWORD( lParam );
-		int yPos = ( short )HIWORD( lParam );
-
-		if( uMsg == WM_MOUSEWHEEL )
-		{
-			// WM_MOUSEWHEEL passes screen mouse coords
-			// so convert them to client coords
-			POINT pt;
-			pt.x = xPos; pt.y = yPos;
-			ScreenToClient( hWnd, &pt );
-			xPos = pt.x; yPos = pt.y;
-		}
-
-		int nMouseWheelDelta = 0;
-		if( uMsg == WM_MOUSEWHEEL )
-			nMouseWheelDelta = ( short )HIWORD( wParam );
-
-		int nMouseButtonState = LOWORD( wParam );
-		bool bLeftButton = ( ( nMouseButtonState & MK_LBUTTON ) != 0 );
-		bool bRightButton = ( ( nMouseButtonState & MK_RBUTTON ) != 0 );
-		bool bMiddleButton = ( ( nMouseButtonState & MK_MBUTTON ) != 0 );
-		bool bSideButton1 = ( ( nMouseButtonState & MK_XBUTTON1 ) != 0 );
-		bool bSideButton2 = ( ( nMouseButtonState & MK_XBUTTON2 ) != 0 );
-
-		bool* bMouseButtons =GetMouseButtons();
-		bMouseButtons[0] = bLeftButton;
-		bMouseButtons[1] = bMiddleButton;
-		bMouseButtons[2] = bRightButton;
-		bMouseButtons[3] = bSideButton1;
-		bMouseButtons[4] = bSideButton2;
-
-		this->MouseProc( bLeftButton, bRightButton, bMiddleButton, bSideButton1, bSideButton2, nMouseWheelDelta,
-			xPos, yPos);
-	}
-	//过滤一下
-	bool bNoFurtherProcessing = false;
-	LRESULT nResult = this->PreMyProc( hWnd, uMsg, wParam, lParam, bNoFurtherProcessing);
-	if( bNoFurtherProcessing )
-		return nResult;
-
 	switch( uMsg )
 	{
-	case WM_PAINT:
-		{
-			// Handle paint messages when the app is paused
-			if( IsRenderPaused() &&
-				GetDeviceObjectsCreated() && GetDeviceObjectsReset() )
-			{
-				HRESULT hr;
-				double fTime = YYUTTimer::GetInstance().GetTime();
-				float fElapsedTime = YYUTTimer::GetInstance().GetElapseTime();	
-				OnFrameRender(  fTime, fElapsedTime );
-				hr = D3D9Device->Present( NULL, NULL, NULL, NULL );
-				if( D3DERR_DEVICELOST == hr )
-				{
-					SetDeviceLost( true );
-				}
-				else if( D3DERR_DRIVERINTERNALERROR == hr )
-				{
-					// When D3DERR_DRIVERINTERNALERROR is returned from Present(),
-					// the application can do one of the following:
-					// 
-					// - End, with the pop-up window saying that the application cannot continue 
-					//   because of problems in the display adapter and that the user should 
-					//   contact the adapter manufacturer.
-					//
-					// - Attempt to restart by calling IDirect3DDevice9::Reset, which is essentially the same 
-					//   path as recovering from a lost device. If IDirect3DDevice9::Reset fails with 
-					//   D3DERR_DRIVERINTERNALERROR, the application should end immediately with the message 
-					//   that the user should contact the adapter manufacturer.
-					// 
-					// The framework attempts the path of resetting the device
-					// 
-					SetDeviceLost( true );
-				}
-
-			}
-
-		}
-		break;
-
-
-	case WM_SIZE:
-		if( SIZE_MINIMIZED == wParam )
-		{
-			Pause( true, true ); // Pause while we're minimized
-			SetMinimized( true );
-			SetMaximized( false );
-		}
-		else
-		{
-			RECT rcCurrentClient;
-			GetClientRect( GetHWND(), &rcCurrentClient );
-			if( rcCurrentClient.top == 0 && rcCurrentClient.bottom == 0 )
-			{
-				// Rapidly clicking the task bar to minimize and restore a window
-				// can cause a WM_SIZE message with SIZE_RESTORED when 
-				// the window has actually become minimized due to rapid change
-				// so just ignore this message
-			}
-			else if( SIZE_MAXIMIZED == wParam )
-			{
-				if( GetMinimized() )
-					Pause( false, false ); // Unpause since we're no longer minimized
-				SetMinimized( false );
-				SetMaximized( true );
-				WindowSizeChange();
-				//DXUTCheckForWindowChangingMonitors();
-			}
-			else if( SIZE_RESTORED == wParam )
-			{
-				//DXUTCheckForDXGIFullScreenSwitch();
-				if( GetMaximized() )
-				{
-					SetMaximized( false );
-					WindowSizeChange();
-					//DXUTCheckForWindowChangingMonitors();
-				}
-				else if( GetMinimized() )
-				{
-					Pause( false, false ); // Unpause since we're no longer minimized
-					SetMinimized( false );
-					WindowSizeChange();
-					//DXUTCheckForWindowChangingMonitors();
-				}
-				else
-				{
-					// This WM_SIZE come from resizing the window via an API like SetWindowPos() so 
-					// resize and reset the device now.
-					WindowSizeChange();
-					//DXUTCheckForWindowChangingMonitors();
-				}
-			}
-		}
-		break;
-
-	case WM_GETMINMAXINFO:
-		( ( MINMAXINFO* )lParam )->ptMinTrackSize.x = 40;
-		( ( MINMAXINFO* )lParam )->ptMinTrackSize.y = 50;
-		break;
-
-	case WM_ENTERSIZEMOVE:
-		// Halt frame movement while the app is sizing or moving
-		Pause( true, true );
-		//GetDXUTState().SetInSizeMove( true );
-		break;
-
-	case WM_EXITSIZEMOVE:
-		Pause( false, false );
-		WindowSizeChange();
-		//DXUTCheckForWindowChangingMonitors();
-		//GetDXUTState().SetInSizeMove( false );
-		break;
-
 	case WM_MOUSEMOVE:
 		if( !IsWindowed() )
 		{
@@ -214,66 +27,84 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				d3d_device->SetCursorPosition( ptCursor.x, ptCursor.y, 0 );
 			}
 		}
+		//不能用break，要向下传递
+	case WM_KEYDOWN:
+			switch( wParam )
+			{
+			case VK_ESCAPE:
+				{
+					SendMessage( hWnd, WM_CLOSE, 0, 0 );
+					break;
+				}
+			}
+		//不能用break，要向下传递
+	case WM_SYSKEYDOWN:
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONDBLCLK:
+	case WM_LBUTTONUP:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONDBLCLK:
+	case WM_MBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONDBLCLK:
+	case WM_RBUTTONUP:
+	case WM_MOUSEWHEEL:
+		{
+			YYUTWindowsMsg msg;
+			msg.uMsg=uMsg;
+			msg.lParam=lParam;
+			msg.wParam=wParam;
+			GetKeyBoardMouseMSGQueue().Put(msg);
+		}
 		break;
+
+	case WM_PAINT:
+		{
+		}
+		break;
+
+
+	case WM_SIZE:
+		//移动一个窗口的边框的时候
+		//先发送一个WM_ENTERSIZEMOVE,用来说明开始变化窗口大小
+		//之后一直发送WM_SIZE
+		//最后才发送WM_EXITSIZEMOVE
+		//所以最后再reset
+		WindowSizeChange();
+		break;
+	case WM_GETMINMAXINFO:
+		//窗口在拖动时最大最小的范围
+		( ( MINMAXINFO* )lParam )->ptMinTrackSize.x = 1200;
+		( ( MINMAXINFO* )lParam )->ptMinTrackSize.y = 700;
+		break;
+
+	case WM_ENTERSIZEMOVE:
+		// Halt frame movement while the app is sizing or moving
+		//Pause( true, true );
+		break;
+
+	case WM_EXITSIZEMOVE:
+		//Pause( false, false );
+		WindowSizeChange();
+		break;
+
+	
 
 	case WM_SETCURSOR:
 		if( !IsWindowed() )
 		{
 			IDirect3DDevice9* pd3dDevice = GetD3D9Device();
 			if( pd3dDevice && GetShowCursorWhenFullScreen() )
-
 				return true; // prevent Windows from setting cursor to window class cursor
 		}
-		break;
-
-	case WM_ENTERMENULOOP:
-		// Pause the app when menus are displayed
-		Pause( true, true );
-		break;
-
-	case WM_EXITMENULOOP:
-		Pause( false, false );
-		break;
-
-	case WM_MENUCHAR:
-		// A menu is active and the user presses a key that does not correspond to any mnemonic or accelerator key
-		// So just ignore and don't beep
-		return MAKELRESULT( 0, MNC_CLOSE );
 		break;
 
 	case WM_NCHITTEST:
 		// Prevent the user from selecting the menu in full screen mode
 		if( !IsWindowed() )
 			return HTCLIENT;
-		break;
-
-	case WM_POWERBROADCAST:
-		switch( wParam )
-		{
-#ifndef PBT_APMQUERYSUSPEND
-#define PBT_APMQUERYSUSPEND 0x0000
-#endif
-		case PBT_APMQUERYSUSPEND:
-			// At this point, the app should save any data for open
-			// network connections, files, etc., and prepare to go into
-			// a suspended mode.  The app can use the MsgProc callback
-			// to handle this if desired.
-			return true;
-
-#ifndef PBT_APMRESUMESUSPEND
-#define PBT_APMRESUMESUSPEND 0x0007
-#endif
-		case PBT_APMRESUMESUSPEND:
-			// At this point, the app should recover any data, network
-			// connections, files, etc., and resume running from when
-			// the app was suspended. The app can use the MsgProc callback
-			// to handle this if desired.
-
-			// QPC may lose consistency when suspending, so reset the timer
-			// upon resume.
-			YYUTTimer::GetInstance().Reset();
-			return true;
-		}
 		break;
 
 	case WM_SYSCOMMAND:
@@ -289,58 +120,7 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			break;
 		}
 		break;
-
-	case WM_SYSKEYDOWN:
-		{
-			//switch( wParam )
-			//{
-			//	case VK_RETURN:
-			//		{
-			//			if( GetHandleAltEnter() && DXUTIsAppRenderingWithD3D9() )
-			//			{
-			//				// Toggle full screen upon alt-enter 
-			//				DWORD dwMask = ( 1 << 29 );
-			//				if( ( lParam & dwMask ) != 0 ) // Alt is down also
-			//				{
-			//					// Toggle the full screen/window mode
-			//					DXUTPause( true, true );
-			//					DXUTToggleFullScreen();
-			//					DXUTPause( false, false );
-			//					return 0;
-			//				}
-			//			}
-			//		}
-			//}
-			break;
-		}
-
-	case WM_KEYDOWN:
-		{
-			switch( wParam )
-			{
-			case VK_ESCAPE:
-				{
-					SendMessage( hWnd, WM_CLOSE, 0, 0 );
-					break;
-				}
-
-			/*case VK_PAUSE:
-				{
-					if( GetDXUTState().GetHandlePause() )
-					{
-					bool bTimePaused = DXUTIsTimePaused();
-					bTimePaused = !bTimePaused;
-					if( bTimePaused )
-					DXUTPause( true, false );
-					else
-					DXUTPause( false, false );
-					}
-					break;
-				}*/
-			}
-			break;
-		}
-
+	
 	case WM_CLOSE:
 		{
 			HMENU hMenu;
@@ -348,7 +128,7 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			if( hMenu != NULL )
 				DestroyMenu( hMenu );
 			DestroyWindow( hWnd );
-			//UnregisterClass( L"Direct3DWindowClass", NULL );
+			Pause(true,true);
 			SetHWNDFocus( NULL );
 			SetHWNDDeviceFullScreen( NULL );
 			SetHWNDDeviceWindowed( NULL );
@@ -357,6 +137,11 @@ LRESULT YYUTManager::MyProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 	case WM_DESTROY:
 		PostQuitMessage( 0 );
+		return 0;
+		break;
+		//自定义的全屏函数，必须在有MSGLOOP的线程下工作。
+	case WM_FULLSCREEN:
+		ToggleFullScreenImp();
 		break;
 	}
 
@@ -426,7 +211,10 @@ void YYUT::YYUTManager::Initial()
 	{
 		YYUTApplication::WindowCreate(default_x,default_y,_T("YYUT"));
 #if defined( DEBUG ) || defined( _DEBUG )
-		YYUT::YYSetConsoleA(*main_window);		
+		//把log打到指定的文件
+		YYUT::YYSetConsoleA("out_bug.txt");		
+		//把log在console里显示
+		//YYUT::YYSetConsoleA(GetHWND());		
 #endif // _DEBUG
 		SetHInstance(main_instance);
 		SetHWNDFocus(main_window->hwnd);
@@ -434,6 +222,10 @@ void YYUT::YYUTManager::Initial()
 		SetHWNDDeviceFullScreen(main_window->hwnd);
 		CreateDevice(true,default_x,default_y);
 		GameInit();
+		input_thread_=make_shared<YYUTThread>(std::bind(&YYUTManager::KeyboardMouseProc,this));
+		input_thread_->Start();
+		render_thread_=make_shared<YYUTThread>(std::bind(&YYUTManager::Render3DEnvironment,this));	
+		render_thread_->Start();
 	}
 	catch(YYUTWidnowException &e)
 	{
@@ -450,7 +242,7 @@ void YYUT::YYUTManager::Initial()
 	}
 }
 
-YYUTManager::YYUTManager()
+YYUTManager::YYUTManager():keyboard_mouse_msg_queue_(200),render_pause_lock_(),render_pause_condition_(render_pause_lock_),render_frame_finished_condition_(render_pause_lock_)
 {
 	D3D9=NULL;
 	D3D9Device=NULL;
@@ -467,6 +259,7 @@ YYUTManager::YYUTManager()
 	memset(&CurrentDeviceSettings_,0,sizeof(CurrentDeviceSettings_));
 	not_first_time=false;
 	SetTopmostWhileWindowd(true);
+	render_frame_finished_=true;
 }
 
 YYUTManager::~YYUTManager()
@@ -474,11 +267,6 @@ YYUTManager::~YYUTManager()
 
 }
 
-
-bool YYUTManager::ModifyDeviceSettings(YYUTD3D9DeviceSettings* pDeviceSettings)
-{
-	return true;
-}
 
 HRESULT YYUTManager::OnCreateDevice(IDirect3DDevice9* pd3dDevice, const D3DSURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext)
 {
@@ -507,45 +295,54 @@ void YYUTManager::OnDestroyDevice(void* pUserContext)
 
 }
 
-void YYUTManager::KeyboardProc(UINT nChar, bool bKeyDown, bool bAltDown)
-{
 
-}
 
-HRESULT YYUTManager::PreMyProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam,bool &Further_process)
-{
-	return S_OK;
-}
-
-bool YYUTManager::IsRenderPaused()
-{
-	return GetPauseRenderingCount()>0;
-}
 
 void YYUTManager::Pause(bool time_stop,bool render_stop)
 {
-	int pause_time_count=GetPauseTimeCount();
-	if(time_stop)
-		pause_time_count++;
-	else
-		pause_time_count--;
-	if(pause_time_count<0)
-		pause_time_count=0;
-	SetPauseTimeCount(pause_time_count);
-	int pause_render_count=GetPauseRenderingCount();
-	if(render_stop)
-		pause_render_count++;
-	else
-		pause_render_count--;
-	if(pause_render_count<0)
-		pause_render_count=0;
-	SetPauseRenderingCount(pause_render_count);
-	if(pause_time_count>0)
-		YYUTTimer::GetInstance().Stop();
-	else
-		YYUTTimer::GetInstance().Start();
-	SetRenderingPaused(pause_render_count>0);
-	SetTimePaused(pause_time_count>0);
+	
+	{
+		YYUTMutexLockGuard lock(mutex_);
+		if(time_stop)
+			PauseTimeCount++;
+		else
+			PauseTimeCount--;
+		if(PauseTimeCount<0)
+			PauseTimeCount=0;
+		if(PauseTimeCount>0)
+		{
+			YYUTTimer::GetInstance().Stop();
+			TimePaused=true;
+		}
+		else
+		{
+			YYUTTimer::GetInstance().Start();
+			TimePaused=false;
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////
+	//render
+	{
+		YYUTMutexLockGuard lock(render_pause_lock_);
+		
+			if(render_stop)
+			{
+				PauseRenderingCount++;
+				cout<<"begin pause"<<endl;
+				while(!render_frame_finished_)
+					render_frame_finished_condition_.Wait();
+			}
+			else
+			{
+				PauseRenderingCount--;
+				if(PauseRenderingCount<0)
+					PauseRenderingCount=0;
+				cout<<"start pase"<<endl;
+			}
+			if(PauseRenderingCount==0)
+				render_pause_condition_.Notify();
+	}
+	cout<<"end pause"<<endl;
 }
 
 HWND YYUTManager::GetHWND()
@@ -560,6 +357,7 @@ bool YYUTManager::IsWindowed()
 
 void YYUTManager::WindowSizeChange()
 {
+	//防止在d3d没初始化完成时调用，窗口初始化的时候会有WM_SIZE消息
 	if(GetIgnoreSizeChange())
 		return;
 	YYUTD3D9DeviceSettings ds=*GetCurrentDeviceSettings();
@@ -594,10 +392,6 @@ HRESULT YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Setti
 	if(!new_device_Settings)
 		BOOST_THROW_EXCEPTION(boost::enable_error_info(std::invalid_argument("invalid new_device_settings")));	
 
-	if(!this->ModifyDeviceSettings(new_device_Settings))
-	{
-		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_str("modify device settings failed!"));
-	}
 	SetCurrentDeviceSettings(new_device_Settings);
 	Pause(true,true);
 	SetIgnoreSizeChange(true);
@@ -666,17 +460,7 @@ HRESULT YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Setti
 			}
 			else 
 			{
-				SetCurrentDeviceSettings(&old_d3ddevice_setting);
-				hr=ChangeDevice(&old_d3ddevice_setting,true);
-				if(FAILED(hr))
-				{
-					BOOST_THROW_EXCEPTION(YYUTException()<<err_str("can't changed the device to old state"));
-				}
-				else
-				{
-					Pause(false,false);
-				}
-
+				BOOST_THROW_EXCEPTION(YYUTException()<<err_str("can't changed the device to old state"));
 			}
 		}
 		
@@ -690,12 +474,12 @@ HRESULT YYUT::YYUTManager::ChangeDevice(YYUTD3D9DeviceSettings* new_device_Setti
 		}
 		catch(...){
 			Cleanup3DEnvironment9(true);
-			Pause(false,false);
+			/*Pause(false,false);*/
 			SetIgnoreSizeChange(false);
 			throw;
 		}
 	}
-	if(!not_first_time)
+	if(!not_first_time)//first time
 	{
 		SetWindowPos(GetHWNDDeviceWindowed(),HWND_NOTOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOREDRAW|SWP_NOSIZE);
 	}
@@ -750,17 +534,13 @@ HRESULT YYUTManager::Reset3DEnvironment()
 	hr=d3d_device->Reset(&device_setting.pp);
 	if(FAILED(hr))
 	{
-		if(hr==D3DERR_DEVICELOST)
-			return D3DERR_DEVICELOST;
-		else
-			BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_hr(hr)<<err_str("Try to reset device failed!"));
+		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_hr(hr)<<err_str("Try to reset device failed!"));
 	}
 	SetCurrentDeviceSettings(&device_setting);
 	UpdateBackBufferDes();
 	SetupCursor();
 	if(!OnResetDevice(NULL))
 	{
-		OnLostDevice(NULL);
 		BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_str("try to reset user defined reset function failed!"));
 	}
 	SetDeviceObjectsReset(true);
@@ -1089,10 +869,18 @@ void YYUT::YYUTManager::Create3DEnvironment9()
 	 }
  }
 
-void YYUTManager::MouseProc(bool bLeftButtonDown, bool bRightButtonDown, bool bMiddleButtonDown, bool bSideButton1Down, bool bSideButton2Down, int nMouseWheelDelta, int xPos, int yPos)
-{
+ YYUTMsgQueue<YYUTWindowsMsg> & YYUT::YYUTManager::GetKeyBoardMouseMSGQueue()
+ {
+	 YYUTMutexLockGuard lock(mutex_);
+	 return keyboard_mouse_msg_queue_;
+ }
 
-}
+ void YYUT::YYUTManager::KeyboardMouseProc(void)
+ {
+
+ }
+
+
 
 void YYUTManager::CreateDevice(bool windowd,int width,int height)
 {
@@ -1133,71 +921,58 @@ void YYUTManager::CreateDevice(bool windowd,int width,int height)
 int YYUTManager::Run()
 {
 	HWND hwnd=GetHWNDFocus();
-	bool get_msg;
 	MSG msg;
-	msg.message=WM_NULL;
-	PeekMessage(&msg,NULL,0U,0U,PM_NOREMOVE);
-	while(WM_QUIT!=msg.message)
+	//一定要是null,因为主窗口distroy之后hwnd就是无效了的。
+	while(GetMessage(&msg,NULL,0,0))
 	{
-		get_msg=(PeekMessage(&msg,NULL,0U,0U,PM_REMOVE)!=0);
-		if(get_msg)
-		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-		}
-		else
-			Render3DEnvironment();
 	}
 	return msg.message;
 }
 
 void YYUTManager::Render3DEnvironment()
 {
-	HRESULT hr;
-	if(GetDeviceLost() || IsRenderPaused())
+	for(;;)
 	{
-		Sleep(50);
-	}
-	// If no device created yet because device was lost (ie. another fullscreen exclusive device exists), 
-	// then wait and try to create every so often.
-	IDirect3DDevice9 *d3d_device=GetD3D9Device();
-	if(NULL==d3d_device)
-	{
+		cout<<"render begin"<<endl;	
+		{
+			YYUTMutexLockGuard lock(render_pause_lock_);
+			while(PauseRenderingCount)
+				render_pause_condition_.Wait();
+			render_frame_finished_=false;
+		}
+		HRESULT hr;
+		
 		if(GetDeviceLost())
 		{
-			YYUTD3D9DeviceSettings dev_set=*GetCurrentDeviceSettings();
-			ChangeDevice(&dev_set,false);
+			Sleep(50);
 		}
-		return;
-	}
-	if(GetDeviceLost() && !GetRenderingPaused())
-	{
-		if(FAILED(hr=d3d_device->TestCooperativeLevel()))
+		// If no device created yet because device was lost (ie. another fullscreen exclusive device exists), 
+		// then wait and try to create every so often.
+		CComPtr<IDirect3DDevice9> d3d_device(GetD3D9Device());
+		assert(d3d_device);
+		if(NULL==d3d_device)
 		{
-			if(D3DERR_DEVICELOST==hr)
-			{
-				// The device has been lost but cannot be reset at this time.
-				// So wait until it can be reset.
-				return;
-			}
+			BOOST_THROW_EXCEPTION(YYUTManagerException()<<err_str("render error :not found d3d_device"));
 		}
-	}
-	double time,abs_time;
-	float elapsed_time=0;
-	YYUTTimer::GetInstance().GetTimeAll(&time,&abs_time,&elapsed_time);
-	if(GetConstantFrameTime())
-	{
-		elapsed_time=GetTimePerFrame();
-		time=GetTime()+elapsed_time;
-	}
-	SetTime(time);
-	SetAbsoluteTime(abs_time);
-	SetElapsedTime(elapsed_time);
-	UpdateFrameStatus();
-	if(!GetRenderingPaused())
-	{
+
+		double time,abs_time;
+		float elapsed_time=0;
+		YYUTTimer::GetInstance().GetTimeAll(&time,&abs_time,&elapsed_time);
+		if(GetConstantFrameTime())
+		{
+			elapsed_time=GetTimePerFrame();
+			time=GetTime()+elapsed_time;
+		}
+		SetTime(time);
+		SetAbsoluteTime(abs_time);
+		SetElapsedTime(elapsed_time);
+		UpdateFrameStatus();
+		
 		OnFrameRender(time,elapsed_time);
 		hr=d3d_device->Present(nullptr,nullptr,nullptr,nullptr);
+		cout<<"after ender"<<endl;
 		if(FAILED(hr))
 		{
 			if(D3DERR_DEVICELOST==hr)
@@ -1209,11 +984,17 @@ void YYUTManager::Render3DEnvironment()
 				SetDeviceLost(true);
 			}
 		}
+	/*	int nFrame=GetCurrentFrameNumber();
+		nFrame++;
+		SetCurrentFrameNumber(nFrame);
+	*/	//////////////////////////////////////////////////////////////////////////
+		//pause
+		{
+			YYUTMutexLockGuard lock(render_pause_lock_);
+			render_frame_finished_=true;
+			render_frame_finished_condition_.Notify();
+		}
 	}
-	int nFrame=GetCurrentFrameNumber();
-	nFrame++;
-	SetCurrentFrameNumber(nFrame);
-	return;
 }
 
 bool YYUTManager::FindVaildDeviceSettings(YYUTD3D9DeviceSettings* dev_set)
@@ -1243,7 +1024,7 @@ void YYUTManager::GameResourceLost()
 
 }
 
-void YYUTManager::ToggleFullScreen()
+void YYUTManager::ToggleFullScreenImp()
 {
 //	HRESULT hr;
 	YYUTD3D9DeviceSettings dev_setting=*GetCurrentDeviceSettings();
@@ -1272,26 +1053,5 @@ void YYUTManager::ToggleFullScreen()
 		}
 	}
 }
-
-
-
-void YYUTManager::YYUTLock::Init()
-{
-	InitializeCriticalSectionAndSpinCount(&cs,1000);
-}
-
-YYUTManager::YYUTLock::~YYUTLock()
-{
-
-}
-
-YYUTManager::YYUTLock::YYUTLock()
-{
-
-}
-
-CRITICAL_SECTION YYUTManager::YYUTLock::cs;
-
-
 
 

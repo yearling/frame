@@ -2,8 +2,10 @@
 #define __YY_TIMER_H__
 
 #include "stdafx.h"
+#include "YYUTMutiThread.h"
 namespace YYUT
 {
+	//thread safty
 	class YYUTTimer
 	{
 	public:
@@ -20,18 +22,20 @@ namespace YYUT
 		void    LimitThreadAffinityToCurrentProc();
 		inline static YYUTTimer& GetInstance()
 		{
-			return _instance;
+			return instance_;
 		}
 	protected:
 		LARGE_INTEGER GetAdjustedCurrentTime();
-		bool using_QPF;
-		bool timer_stopped;
-		LONGLONG QPF_Ticks_per_sec;
-		LONGLONG stop_time;
-		LONGLONG last_elapsed_time;
-		LONGLONG base_time;
+	   inline LARGE_INTEGER GetAdjustedCurrentTimeWithHold();
+		bool using_QPF_;
+		bool timer_stopped_;
+		LONGLONG QPF_Ticks_per_sec_;//Hz
+		LONGLONG stop_time_;
+		LONGLONG last_elapsed_time_;
+		LONGLONG base_time_;
 	private:
-		static YYUTTimer _instance;
+		static YYUTTimer instance_;
+		mutable YYUTMutexLock mutex_;
 	};
 
 	

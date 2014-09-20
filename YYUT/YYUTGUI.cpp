@@ -490,6 +490,7 @@ namespace YYUT
 	DWORD YYUT_SCREEN_VERTEX_UNTEX::FVF=D3DFVF_XYZRHW | D3DFVF_DIFFUSE;
 	void YYUTDialog::OnRender(float elapsed_time)
 		try{
+			YYUTMutexLockGuard lock(mutex_);
 			HRESULT hr;
 			assert(manager_->GetD3D9Device() && manager_->state_block_);
 			CComPtr<IDirect3DDevice9> com_d3ddevice=manager_->GetD3D9Device();
@@ -714,6 +715,7 @@ namespace YYUT
 
 	bool YYUTDialog::ProcessMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
+		YYUTMutexLockGuard lock(mutex_);
 		bool handled=false;
 		if(!visible_)
 			return false;

@@ -111,5 +111,14 @@
     <ClInclude Include="..\YYUT\YYUTThread.h">
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTAotmic.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMsgPackege.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMsgQueue.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

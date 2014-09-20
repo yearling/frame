@@ -3,6 +3,7 @@
 #pragma  once
 #include "stdafx.h"
 #include "YYUT.h"
+#include "YYUTMutiThread.h"
 #include <memory>
 #include <vector>
 #include <unordered_set>
@@ -192,6 +193,7 @@ namespace YYUT
 		std::map<string,YYUTElement> element_map_;
 		HWND hwnd_;
 		float font_scalar_;
+		YYUTMutexLock mutex_;
 	};
 	class YYUTDialogResourceManager:boost::noncopyable
 	{

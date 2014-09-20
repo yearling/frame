@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "YYUTObject.h"
-
+#include <utility>
 namespace YYUT
 {
 
@@ -33,7 +33,7 @@ namespace YYUT
 					if(FAILED(hr))
 						BOOST_THROW_EXCEPTION(YYUTObjectException()<<err_str("Create texture Faild! mesh name is "+string(mtrls[i].pTextureFilename))<<err_hr(hr));
 				}
-				material_texture_combine_.push_back(make_pair(mtrls[i].MatD3D,tex));
+				material_texture_combine_.push_back(std::make_pair(mtrls[i].MatD3D,tex));
 			}
 		}
 	}

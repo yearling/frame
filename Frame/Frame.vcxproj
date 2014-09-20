@@ -68,6 +68,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -180,6 +181,7 @@
   <ItemGroup>
     <ClInclude Include="..\YYUT\stdafx.h" />
     <ClInclude Include="..\YYUT\YYUT.h" />
+    <ClInclude Include="..\YYUT\YYUTAotmic.h" />
     <ClInclude Include="..\YYUT\YYUTApplication.h" />
     <ClInclude Include="..\YYUT\YYUTBlockingQueue.h" />
     <ClInclude Include="..\YYUT\YYUTBoundBlockingQueue.h" />
@@ -187,6 +189,8 @@
     <ClInclude Include="..\YYUT\YYUTenum.h" />
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
+    <ClInclude Include="..\YYUT\YYUTMsgPackege.h" />
+    <ClInclude Include="..\YYUT\YYUTMsgQueue.h" />
     <ClInclude Include="..\YYUT\YYUTMutiThread.h" />
     <ClInclude Include="..\YYUT\YYUTObject.h" />
     <ClInclude Include="..\YYUT\YYUTThread.h" />

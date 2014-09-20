@@ -3,7 +3,7 @@
 #pragma once
 #include "stdafx.h"
 #include "YYUT.h"
-#include "YYUTMutiThread.h"
+#include "YYUTAotmic.h"
 #include <boost/noncopyable.hpp>
 #include <functional>
 namespace YYUT

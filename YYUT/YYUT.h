@@ -26,13 +26,7 @@
 #define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p)=NULL; } }
 #endif
 
-#define  SET_ACCESSOR(x,y)  inline void Set##y( x t) {YYUTLock l;y=t;};
-#define  GET_ACCESSOR(x,y)  inline x Get##y()  {YYUTLock l; return y;};
-#define  GET_SET_ACCESSOR(x,y) SET_ACCESSOR(x,y) GET_ACCESSOR(x,y)
 
-#define  SETP_ACCESSOR(x,y) inline void Set##y(x * t) {YYUTLock l; y=*t;};
-#define  GETP_ACCESSOR(x,y) inline x* Get##y() {YYUTLock l; return &y;};
-#define  GETP_SETP_ACCESSOR(x,y) SETP_ACCESSOR(x,y) GETP_ACCESSOR(x,y)
 #if defined( DEBUG ) || defined( _DEBUG )
 #define  TRACE_FUNCTION  printf("call %s \n",__FUNCTION__); 
 #else
@@ -50,7 +44,7 @@ namespace YYUT{
 	struct YYUTException:virtual boost::exception,virtual std::exception{};
 	struct YYUTD3DException:virtual YYUTException{};
 	typedef boost::error_info<struct tag_err_HRESULT,HRESULT> err_hr;
-	typedef boost::error_info<struct tag_err_string,string> err_str;
+	typedef boost::error_info<struct tag_err_string,std::string> err_str;
 	struct YYUTD3D9DeviceSettings
 	{
 		UINT adapter_ordinal;

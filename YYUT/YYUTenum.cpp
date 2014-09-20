@@ -1,11 +1,8 @@
 #include "stdafx.h"
 #include "YYUTenum.h"
 #include <algorithm>
-#include <iostream>
 #include <set>
 #include <iomanip>
-using namespace std;
-
 bool operator < (const D3DDISPLAYMODE & d1,const D3DDISPLAYMODE &d2)
 {
 	if(d1.Width<d2.Width)
@@ -472,7 +469,7 @@ namespace YYUT
 			for_each((*i_adapter)->display_mode_list.begin(),
 				(*i_adapter)->display_mode_list.end(),
 				[&](D3DDISPLAYMODE& d){
-					wcout<<_T("mode[")<<setw(2)<<display_mode_count++<<_T("]:")<<
+					std::wcout<<_T("mode[")<<setw(2)<<display_mode_count++<<_T("]:")<<
 						setw(5)<<d.Width<<_T("*")<<setw(5)<<d.Height<<_T("   ")<<
 						setw(3)<<d.RefreshRate<<_T("   ")<<Format2String(d.Format)<<endl;
 			});
