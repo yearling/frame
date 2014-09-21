@@ -731,7 +731,7 @@ namespace YYUT
 				return true;
 			}
 		}
-		
+		//printf("go here 1\n");	
 		switch(uMsg)
 		{
 		case WM_SIZE:

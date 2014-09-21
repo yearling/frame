@@ -328,7 +328,6 @@ void YYUTManager::Pause(bool time_stop,bool render_stop)
 			if(render_stop)
 			{
 				PauseRenderingCount++;
-				cout<<"begin pause"<<endl;
 				while(!render_frame_finished_)
 					render_frame_finished_condition_.Wait();
 			}
@@ -337,12 +336,10 @@ void YYUTManager::Pause(bool time_stop,bool render_stop)
 				PauseRenderingCount--;
 				if(PauseRenderingCount<0)
 					PauseRenderingCount=0;
-				cout<<"start pase"<<endl;
 			}
 			if(PauseRenderingCount==0)
 				render_pause_condition_.Notify();
 	}
-	cout<<"end pause"<<endl;
 }
 
 HWND YYUTManager::GetHWND()
@@ -935,7 +932,6 @@ void YYUTManager::Render3DEnvironment()
 {
 	for(;;)
 	{
-		cout<<"render begin"<<endl;	
 		{
 			YYUTMutexLockGuard lock(render_pause_lock_);
 			while(PauseRenderingCount)
@@ -972,7 +968,6 @@ void YYUTManager::Render3DEnvironment()
 		
 		OnFrameRender(time,elapsed_time);
 		hr=d3d_device->Present(nullptr,nullptr,nullptr,nullptr);
-		cout<<"after ender"<<endl;
 		if(FAILED(hr))
 		{
 			if(D3DERR_DEVICELOST==hr)

@@ -62,7 +62,7 @@
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
     <ClCompile Include="..\YYUT\YYUTThread.cpp">
-      <Filter>源文件</Filter>
+      <Filter>YYUT\Cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -87,4 +87,12 @@ namespace YYUT
 //这样子的话刚创建生命周期就结束了
 #define YYUTMutexLockGuard(x)  static_assert(false,"Missing guard object name");
 
+struct YYUTExitScope
+{
+	YYUTExitScope(string str):leave_msg_(str){};
+	~YYUTExitScope(){printf("%s\n",leave_msg_.c_str());}
+private:
+	string leave_msg_;
+};
+#define YYUTExitScope(x)  static_assert(false,"Missing guard object name");
 #endif
