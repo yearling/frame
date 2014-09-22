@@ -200,5 +200,8 @@ namespace YYUT
 		//也就是会在处理输入的线程里执行ToggleFullScreenImp()，这个函数里会调用IDirect3DDevice::Reset
 		//文档上说明了，Reset，Create，Destroy必须在创建窗口的线程里，要么会死锁
 		::PostMessage(GetHWND(),WM_FULLSCREEN,0,0);
+
+		ToggleFullScreenImp();
+
 	}
 }
