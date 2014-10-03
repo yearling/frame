@@ -3,7 +3,7 @@
 #include <boost\exception\diagnostic_information.hpp>
 #include <iostream>
 using namespace YYUT;
-YYGame theApp;
+
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPTSTR    lpCmdLine,
@@ -11,7 +11,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
-	
+	YYGame theApp;
 	int result=0;
 	YYUTApplication* yy_app=GetApplication();
 	try {

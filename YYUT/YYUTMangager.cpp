@@ -260,6 +260,7 @@ YYUTManager::YYUTManager():keyboard_mouse_msg_queue_(200),render_pause_lock_(),r
 	not_first_time=false;
 	SetTopmostWhileWindowd(true);
 	render_frame_finished_=true;
+	SetDeviceLost(false);
 }
 
 YYUTManager::~YYUTManager()
@@ -956,11 +957,6 @@ void YYUTManager::Render3DEnvironment()
 		double time,abs_time;
 		float elapsed_time=0;
 		YYUTTimer::GetInstance().GetTimeAll(&time,&abs_time,&elapsed_time);
-		if(GetConstantFrameTime())
-		{
-			elapsed_time=GetTimePerFrame();
-			time=GetTime()+elapsed_time;
-		}
 		SetTime(time);
 		SetAbsoluteTime(abs_time);
 		SetElapsedTime(elapsed_time);

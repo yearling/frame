@@ -14,6 +14,7 @@ namespace YYUT
 	const int  IDC_FPS				  =4;
 	YYGame::YYGame(void)
 	{
+
 	}
 
 
