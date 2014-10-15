@@ -198,13 +198,19 @@ namespace YYUT
 
 	void YYUTBaseCamera::SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat)
 	{
+
+		D3DXVECTOR3 up(0,1,0);
+		SetViewParam(eye,lookat,&up);	
+	}
+
+	void YYUTBaseCamera::SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat,D3DXVECTOR3 *up)
+	{
 		YYUTMutexLockGuard lock(mutex_);
 		if(NULL==eye || NULL==lookat)
 			return;
 		default_eye_=eye_=*eye;
 		default_lookat_=lookat_= *lookat;
-		D3DXVECTOR3 up(0,1,0);
-		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,&up);
+		D3DXMatrixLookAtLH(&view_,&eye_,&lookat_,up);
 		//先pitch 再yaw
 		//得到的view其实是视坐标基的逆，所以要先进行一次逆得到视坐标的基
 		//然后得到Z轴坐标，进行计算。

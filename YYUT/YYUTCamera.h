@@ -80,6 +80,7 @@ namespace YYUT
 		virtual void FrameMove(float elapse_time)=0;
 		virtual void Reset();
 		virtual void SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat);
+		virtual void SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat,D3DXVECTOR3 *up);
 		virtual void SetProjParam(float FOV,float aspect,float near_plane,float far_plane);
 		virtual void SetDragRect(RECT &rc) {drag_rc_=rc;}
 		void SetInvertPitch(bool invert){invert_pitch_=invert;}
@@ -202,6 +203,7 @@ namespace YYUT
 		virtual bool HandleMessage(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 		virtual void FrameMove(float elapse_time);
 		virtual void Reset();
+		using YYUTBaseCamera::SetViewParam;
 		virtual void SetViewParam(D3DXVECTOR3* eye,D3DXVECTOR3 *lookat);
 		virtual void SetDragRect(RECT &rc);
 		void SetButtonMasks(int rotate_model_button_mask=MOUSE_LEFT_BUTTON,

@@ -36,6 +36,7 @@ namespace YYUT
 		shared_ptr<YYUTButton> bt_sample2;
 		shared_ptr<YYUTButton> bt_sample3;
 		shared_ptr<YYUTAnimationStatic> bt_fps_;
+		std::shared_ptr<YYUTObjectLP> obj_lp;
 	};
 
 }
