@@ -172,6 +172,7 @@
     <ClCompile Include="..\YYUT\YYUT.cpp" />
     <ClCompile Include="..\YYUT\YYUTApplication.cpp" />
     <ClCompile Include="..\YYUT\YYUTCamera.cpp" />
+    <ClCompile Include="..\YYUT\YYUTEffectManager.cpp" />
     <ClCompile Include="..\YYUT\YYUTenum.cpp" />
     <ClCompile Include="..\YYUT\YYUTGUI.cpp" />
     <ClCompile Include="..\YYUT\YYUTMangager.cpp" />
@@ -179,6 +180,7 @@
     <ClCompile Include="..\YYUT\YYUTThread.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
     <ClCompile Include="..\YYUT\YYUTMutiScreen.cpp" />
+    <ClCompile Include="..\YYUT\YYUTUtility.cpp" />
     <ClCompile Include="MainApp.cpp" />
     <ClCompile Include="YYGame.cpp" />
   </ItemGroup>
@@ -190,6 +192,7 @@
     <ClInclude Include="..\YYUT\YYUTBlockingQueue.h" />
     <ClInclude Include="..\YYUT\YYUTBoundBlockingQueue.h" />
     <ClInclude Include="..\YYUT\YYUTCamera.h" />
+    <ClInclude Include="..\YYUT\YYUTEffectManager.h" />
     <ClInclude Include="..\YYUT\YYUTenum.h" />
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
@@ -200,6 +203,7 @@
     <ClInclude Include="..\YYUT\YYUTThread.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
+    <ClInclude Include="..\YYUT\YYUTUtility.h" />
     <ClInclude Include="YYGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

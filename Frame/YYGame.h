@@ -30,12 +30,15 @@ namespace YYUT
 	public:
 		std::shared_ptr<YYUTDialog> hud_;
 		std::shared_ptr<YYUTDialog> hud_fps_;
-		std::shared_ptr<YYUTObjectX> robot_mesh_;
-		std::shared_ptr<YYUTObjectX> cell_mesh_;
+		//std::shared_ptr<YYUTHLSLRenderObject> ball1_;
+		std::vector<std::shared_ptr<YYUTHLSLRenderObject>> balls_;
 		shared_ptr<YYUTButton> bt_fullscreen;
 		shared_ptr<YYUTButton> bt_sample2;
 		shared_ptr<YYUTButton> bt_sample3;
 		shared_ptr<YYUTAnimationStatic> bt_fps_;
+	private:
+		void BallFrameMoveEvent(YYUTHLSLRenderObject *objectx);
+		void BallFrameReset( YYUTHLSLRenderObject *objectx);
 	};
 
 }

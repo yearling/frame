@@ -64,6 +64,12 @@
     <ClCompile Include="..\YYUT\YYUTThread.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTEffectManager.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTUtility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="YYGame.h">
@@ -118,6 +124,12 @@
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTMsgQueue.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTEffectManager.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTUtility.h">
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
   </ItemGroup>

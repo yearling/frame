@@ -31,6 +31,9 @@ namespace YYUT
 		float aspect=(float)width/(float)height;
 		camera_.SetProjParam(D3DX_PI/4,aspect,1.0f,1000.0f);
 		camera_.SetWindow(width,height);
+		YYUTEffectManager::GetInstance().OnDeviceReset();
+		for_each(balls_.begin(),balls_.end(),[&]( std::shared_ptr<YYUTHLSLRenderObject> & ptr){
+			ptr->OnResetDevice();});
 	}
 	catch(YYUTGUIException &e)
 	{
@@ -46,33 +49,32 @@ namespace YYUT
 	try{
 		HRESULT hr;
 		HUDInit();
-
 		YYUTDialogResourceManager::GetInstance()->SetHWND(GetHWND());
 		YYUTDialogResourceManager::GetInstance()->OnD3DCreateDevice(GetD3D9Device());
-		
-		robot_mesh_=make_shared<YYUTObjectX>();
-		robot_mesh_->Init(GetD3D9Device());
-		robot_mesh_->LoadObject(_T("..\\media\\robot\\robot.x"));
-		cell_mesh_=make_shared<YYUTObjectX>();
-		cell_mesh_->Init(GetD3D9Device());
-		cell_mesh_->LoadObject(_T("..\\media\\cell\\cell.x"));
-		byte* vertex_buf=nullptr;
-		auto mesh=robot_mesh_->GetMesh();
-		mesh->LockVertexBuffer(0, (void**)&vertex_buf);
-		D3DXVECTOR3 center;
-		float radius;
-		 hr = D3DXComputeBoundingSphere((D3DXVECTOR3*)vertex_buf, mesh->GetNumVertices(),
-			D3DXGetFVFVertexSize(mesh->GetFVF()), &center, &radius);
-		if(FAILED(hr))
-			BOOST_THROW_EXCEPTION(YYUTException()<<err_str("caculation model radius error")<<err_hr(hr));
+		YYUTEffectManager::GetInstance().OnDeviceCreate(GetD3D9Device());
+		YYUTEffectManager::GetInstance().CreateEffect("ball.effect",_T("..\\media\\ball1\\FileFX.fx"));
+		balls_.push_back(make_shared<YYUTHLSLRenderObject>());
+		balls_.push_back(make_shared<YYUTHLSLRenderObject>());
+		balls_.push_back(make_shared<YYUTHLSLRenderObject>());
+		balls_.push_back(make_shared<YYUTHLSLRenderObject>());
+		for_each(balls_.begin(),balls_.end(),[&]( std::shared_ptr<YYUTHLSLRenderObject> & ptr){
+			ptr->Init(GetD3D9Device());});
+		balls_[0]->LoadObject(_T("..\\media\\ball1\\Model.X"),"ball.effect");
+		balls_[1]->LoadObject(_T("..\\media\\ball2\\Model.X"),"ball.effect");
+		balls_[2]->LoadObject(_T("..\\media\\ball3\\Model.X"),"ball.effect");
+		balls_[3]->LoadObject(_T("..\\media\\ball4\\Model.X"),"ball.effect");
+		for(auto iter=balls_.begin();iter!=balls_.end();iter++)
+		{
+			(*iter)->SetFrameMoveEvent(std::bind(&YYGame::BallFrameMoveEvent,this,placeholders::_1));
+			(*iter)->SetFrameResetEvent(std::bind(&YYGame::BallFrameReset,this,placeholders::_1));
+		}
+		float radius=balls_[0]->GetRadius();
 		if(radius<=0)
 		{
 			radius =100.0f;
 		}
-		mesh->UnlockVertexBuffer();
-		D3DXVECTOR3 eye(0.0f , 0.0f,radius*3);
-		D3DXVECTOR3 lookat( 0.0f, 0.0f, 1.0f );
-
+		D3DXVECTOR3 eye(30.0f , 15.0f,0.0f);
+		D3DXVECTOR3 lookat( 0.0f, 0.0f, 0.0f );
 		camera_.SetHWND(GetHWND());
 		camera_.SetViewParam(&eye,&lookat);
 		//camera_.SetRaius(3*radius);
@@ -85,6 +87,7 @@ namespace YYUT
 	void YYGame::GameResourceLost()
 	{
 		YYUTDialogResourceManager::GetInstance()->OnD3DLostDevice();
+		YYUTEffectManager::GetInstance().OnDeviceLost();
 	}
 
 	void YYGame::GameMain(double time_span, double time_elapse)
@@ -98,25 +101,11 @@ namespace YYUT
 		GetD3D9Device()->Clear( 0, NULL, D3DCLEAR_TARGET|D3DCLEAR_STENCIL|D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB( 100, 0, 0 ), 1.0f, 0 );
 		if(SUCCEEDED(GetD3D9Device()->BeginScene()))	
 		{
-			D3DXMATRIX world,view,proj;
-			world=*camera_.GetWorldMatrix();
-			view=*camera_.GetViewMatrix();
-			proj=*camera_.GetProjMatrix();
-			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
-			GetD3D9Device()->SetTransform(D3DTS_VIEW,&view);
-			GetD3D9Device()->SetTransform(D3DTS_PROJECTION,&proj);
-
-			GetD3D9Device()->SetRenderState(D3DRS_LIGHTING,FALSE);
+			//////////////////////////////////////////////////////////////////////////
+			for_each(balls_.begin(),balls_.end(),[&]( std::shared_ptr<YYUTHLSLRenderObject> & ptr){
+				ptr->OnFrameMove();ptr->Draw();});
 			//////////////////////////////////////////////////////////////////////////
 			
-			//////////////////////////////////////////////////////////////////////////
-			robot_mesh_->Draw();	
-			D3DXMatrixIdentity(&world);
-			D3DXMATRIX scale;
-			D3DXMatrixScaling(&scale,5.0f,5.0f,5.0f);
-			world*=scale;
-			GetD3D9Device()->SetTransform(D3DTS_WORLD,&world);
-			cell_mesh_->Draw();
 			//////////////////////////////////////////////////////////////////////////
 			//draw controls eq: button animate_static dialog huds;
 			hud_->OnRender((float)time_elapse);	
@@ -202,4 +191,55 @@ namespace YYUT
 		//文档上说明了，Reset，Create，Destroy必须在创建窗口的线程里，要么会死锁
 		::PostMessage(GetHWND(),WM_FULLSCREEN,0,0);
 	}
+
+	
+	void YYGame::BallFrameReset(YYUTHLSLRenderObject *objectx)
+	{
+		if(objectx)
+		{
+			CComPtr<IDirect3DTexture9> texture=objectx->GetMaterialTextureCombine()[0].second;
+			CComPtr<ID3DXEffect> effect=objectx->GetEffect();
+			effect->SetTechnique("DefaultTech");
+			effect->SetTexture("g_ColorTexture",texture);
+		}
+	}
+
+	void YYGame::BallFrameMoveEvent(YYUTHLSLRenderObject *objectx)
+	{
+		HRESULT hr=S_OK;
+		if(objectx)
+		{
+			auto effect=objectx->GetEffect();	
+			effect->SetMatrix("g_matWorld",camera_.GetWorldMatrix());
+			effect->SetMatrix("g_matView",camera_.GetViewMatrix());
+			effect->SetMatrix("g_matProject",camera_.GetProjMatrix());
+			effect->SetFloat("g_fTime",GetElapsedTime());
+			D3DXVECTOR4 eye(*camera_.GetEyePt(),0);
+			effect->SetVector("g_vEyePosition",&eye);
+			D3DXMATRIX mat_material;
+			D3DMATERIAL9 mtr=objectx->GetMaterialTextureCombine()[0].first;
+			mat_material._11=mtr.Ambient.r;
+			mat_material._12=mtr.Ambient.g;
+			mat_material._13=mtr.Ambient.b;
+			mat_material._14=mtr.Ambient.a;
+			mat_material._21=mtr.Diffuse.r;
+			mat_material._22=mtr.Diffuse.g;
+			mat_material._23=mtr.Diffuse.b;
+			mat_material._24=mtr.Diffuse.a;
+			mat_material._31=mtr.Specular.r;
+			mat_material._32=mtr.Specular.g;
+			mat_material._33=mtr.Specular.b;
+			mat_material._34=mtr.Specular.a;
+			effect->SetMatrix("g_matMaterial",&mat_material);
+			float determinnat;
+			D3DXMATRIX mat_out;
+			D3DXMatrixInverse(&mat_out,&determinnat,camera_.GetWorldMatrix());
+			D3DXMatrixTranspose(&mat_out,&mat_out);
+			effect->SetMatrix("g_matWorldNormalInverseTranspose",&mat_out);
+			float fTime=GetElapsedTime();
+			D3DXVECTOR4 vLightPosition( 7.0f ,35.0f  , 7.0f , 1.0f );
+			effect->SetVector("g_vLightPosition",&vLightPosition);
+		}
+	}
+
 }
