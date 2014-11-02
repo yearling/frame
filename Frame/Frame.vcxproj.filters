@@ -3,7 +3,8 @@
   <ItemGroup>
     <Filter Include="源文件">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <Extensions>
+      </Extensions>
     </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
@@ -11,17 +12,19 @@
     </Filter>
     <Filter Include="头文件">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>
+      </Extensions>
     </Filter>
     <Filter Include="YYUT">
       <UniqueIdentifier>{314d336f-d270-4eb2-86ce-64edef12ab7c}</UniqueIdentifier>
     </Filter>
     <Filter Include="YYUT\头文件">
       <UniqueIdentifier>{4bc0644f-dc3c-4520-a142-0ed3dfb3981e}</UniqueIdentifier>
-      <Extensions>*.h</Extensions>
+      <Extensions>h;hpp;hxx;</Extensions>
     </Filter>
     <Filter Include="YYUT\Cpp">
       <UniqueIdentifier>{dd0e6fa0-d550-40c8-8ab7-df40d4b6f981}</UniqueIdentifier>
+      <Extensions>cpp;cxx;cc;</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -67,16 +70,25 @@
     <ClCompile Include="..\YYUT\YYUTEffectManager.cpp">
       <Filter>YYUT\Cpp</Filter>
     </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTFBX.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTFBXImport.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTMesh.cpp">
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
     <ClCompile Include="..\YYUT\YYUTUtility.cpp">
-      <Filter>源文件</Filter>
+      <Filter>YYUT\Cpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\YYUT\YYUTNode.cpp">
+      <Filter>YYUT\Cpp</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="YYGame.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\YYUT\stdafx.h">
-      <Filter>YYUT\头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\YYUT\YYUTApplication.h">
       <Filter>YYUT\头文件</Filter>
@@ -132,5 +144,23 @@
     <ClInclude Include="..\YYUT\YYUTUtility.h">
       <Filter>YYUT\头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTFBX.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTFBXImport.h">
+      <Filter>YYUT\Cpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTMesh.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\YYUTNode.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\YYUT\stdafx.h">
+      <Filter>YYUT\头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\YYUT\YYUTNode" />
   </ItemGroup>
 </Project>

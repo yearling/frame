@@ -9,9 +9,12 @@
   <ItemDefinitionGroup>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files\Autodesk\FBX\FBX SDK\2015.1\lib\vs2010\x86\debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>wininet.lib;Winmm.lib;d3d9.lib;d3d10.lib;d3d10_1.lib;d3d11.lib;d3dcompiler.lib;D3DCSX.lib;D3DCSXd.lib;d3dx9.lib;d3dx9d.lib;d3dx10.lib;d3dx10d.lib;d3dx11.lib;d3dx11d.lib;d3dxof.lib;dinput8.lib;dsetup.lib;dsound.lib;dwrite.lib;DxErr.lib;dxgi.lib;dxguid.lib;X3DAudio.lib;xapobase.lib;xapobased.lib;XAPOFX.lib;XInput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk.lib;wininet.lib;Winmm.lib;d3d9.lib;d3d10.lib;d3d10_1.lib;d3d11.lib;d3dcompiler.lib;D3DCSX.lib;D3DCSXd.lib;d3dx9.lib;d3dx9d.lib;d3dx10.lib;d3dx10d.lib;d3dx11.lib;d3dx11d.lib;d3dxof.lib;dinput8.lib;dsetup.lib;dsound.lib;dwrite.lib;DxErr.lib;dxgi.lib;dxguid.lib;X3DAudio.lib;xapobase.lib;xapobased.lib;XAPOFX.lib;XInput.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBMCT</IgnoreSpecificDefaultLibraries>
     </Link>
+    <ClCompile>
+      <PreprocessorDefinitions>FBXSDK_SHARED;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

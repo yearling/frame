@@ -78,6 +78,9 @@ namespace YYUT
 		camera_.SetHWND(GetHWND());
 		camera_.SetViewParam(&eye,&lookat);
 		//camera_.SetRaius(3*radius);
+		//////////////////////////////////////////////////////////////////////////
+		YYUTImportFactory im;
+		im.CreateImport("hello.txt");
 	}
 	catch(YYUTGUIException &e)
 	{

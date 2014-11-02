@@ -7,6 +7,8 @@
 #include <utility>
 #include <string>
 #include <functional>
+#include <memory>
+#include <boost\noncopyable.hpp>
 namespace YYUT{
 	struct YYUTObjectException:virtual YYUTException{};
 
@@ -71,6 +73,22 @@ namespace YYUT{
 		CComPtr<ID3DXEffect> effect_;
 		EffectEvent frame_move_event_;
 		EffectEvent frame_reset_event_;
+	};
+	
+	class YYUTObjectImportBase:public std::enable_shared_from_this<YYUTObjectImportBase>
+	{
+	public:
+		enum ModelType{ x=0,fbx,collda,object,ply};
+		virtual ModelType GetType() const=0;
+		virtual bool Load(string file_name="")=0;
+		virtual ~YYUTObjectImportBase()=0;
+	};
+	class YYUTImportFactory:boost::noncopyable
+	{
+	public:
+		static std::shared_ptr<YYUTObjectImportBase> CreateImport(wstring file_name);
+		static std::shared_ptr<YYUTObjectImportBase> CreateImport(string file_name);
+		static std::shared_ptr<YYUTObjectImportBase> CreateImport(YYUTObjectImportBase::ModelType model_type);
 	};
 }
 #endif

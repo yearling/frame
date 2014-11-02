@@ -7,18 +7,22 @@
 namespace YYUT
 {
 	struct YYUTFBXException:YYUTException{};
+	//到FBX v2014版，fbx sdk不支持多线程，所以没有并发控制
 	class YYUTFBXManager
 	{
 	public:
 		YYUTFBXManager();
+		~YYUTFBXManager();
 		void Init();
-		YYUTFBXManager &GetInstance() const{ return &instance_;}
-		FbxScene *CreateScence(string file_path,string scene_name);
+		static YYUTFBXManager &GetInstance() { return instance_;}
+		std::shared_ptr<FbxScene> CreateScence(string file_path,string scene_name);
 		static YYUTFBXManager instance_;
+		bool GetInitialed() const{ return initialised_;}
 	private:
 		FbxManager *manger_;
 		FbxImporter *importer_;
 		FbxIOSettings *io_setting_;
+		bool      initialised_;
 	};
 }
 #endif

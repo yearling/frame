@@ -174,8 +174,12 @@
     <ClCompile Include="..\YYUT\YYUTCamera.cpp" />
     <ClCompile Include="..\YYUT\YYUTEffectManager.cpp" />
     <ClCompile Include="..\YYUT\YYUTenum.cpp" />
+    <ClCompile Include="..\YYUT\YYUTFBX.cpp" />
+    <ClCompile Include="..\YYUT\YYUTFBXImport.cpp" />
     <ClCompile Include="..\YYUT\YYUTGUI.cpp" />
     <ClCompile Include="..\YYUT\YYUTMangager.cpp" />
+    <ClCompile Include="..\YYUT\YYUTMesh.cpp" />
+    <ClCompile Include="..\YYUT\YYUTNode.cpp" />
     <ClCompile Include="..\YYUT\YYUTObject.cpp" />
     <ClCompile Include="..\YYUT\YYUTThread.cpp" />
     <ClCompile Include="..\YYUT\YYUTTimer.cpp" />
@@ -194,17 +198,24 @@
     <ClInclude Include="..\YYUT\YYUTCamera.h" />
     <ClInclude Include="..\YYUT\YYUTEffectManager.h" />
     <ClInclude Include="..\YYUT\YYUTenum.h" />
+    <ClInclude Include="..\YYUT\YYUTFBX.h" />
+    <ClInclude Include="..\YYUT\YYUTFBXImport.h" />
     <ClInclude Include="..\YYUT\YYUTGUI.h" />
     <ClInclude Include="..\YYUT\YYUTMangager.h" />
+    <ClInclude Include="..\YYUT\YYUTMesh.h" />
     <ClInclude Include="..\YYUT\YYUTMsgPackege.h" />
     <ClInclude Include="..\YYUT\YYUTMsgQueue.h" />
     <ClInclude Include="..\YYUT\YYUTMutiThread.h" />
+    <ClInclude Include="..\YYUT\YYUTNode.h" />
     <ClInclude Include="..\YYUT\YYUTObject.h" />
     <ClInclude Include="..\YYUT\YYUTThread.h" />
     <ClInclude Include="..\YYUT\YYUTTimer.h" />
     <ClInclude Include="..\YYUT\YYUTMutiScreen.h" />
     <ClInclude Include="..\YYUT\YYUTUtility.h" />
     <ClInclude Include="YYGame.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\YYUT\YYUTNode" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "YYUTObject.h"
 #include "YYUTUtility.h"
+#include "YYUTFBXImport.h"
 #include <utility>
 namespace YYUT
 {
@@ -168,5 +169,40 @@ namespace YYUT
 
 
 	int YYUTHLSLRenderObject::SelfFVF::FVFSize=sizeof(SelfFVF);
+
+
+	YYUTObjectImportBase::~YYUTObjectImportBase()
+	{
+
+	}
+
+
+	
+
+
+	std::shared_ptr<YYUTObjectImportBase> YYUTImportFactory::CreateImport(string file_name)
+	{
+		auto pos=file_name.find_last_of('.');
+		auto suffix=file_name.substr(pos);
+		if(suffix==".fbx")
+		{
+			return std::make_shared<YYUTFBXImport>(file_name);
+		}
+		BOOST_THROW_EXCEPTION(YYUTObjectException()<<err_str("unsupport file type,the file name is:"+file_name));
+		return nullptr;
+	}
+
+	std::shared_ptr<YYUTObjectImportBase> YYUTImportFactory::CreateImport(wstring file_name)
+	{
+		string  utf8_string(file_name.begin(),file_name.end());
+		return CreateImport(utf8_string);
+	}
+
+	std::shared_ptr<YYUTObjectImportBase> YYUTImportFactory::CreateImport(YYUTObjectImportBase::ModelType model_type)
+	{
+		if(model_type==YYUTObjectImportBase::fbx)
+			return std::make_shared<YYUTFBXImport>();
+		return nullptr;
+	}
 
 }
